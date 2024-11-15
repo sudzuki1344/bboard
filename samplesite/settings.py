@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'bboard', 'hw'  # 'bboard.apps.BboardConfig',
+    'bboard', 'hw',  # 'bboard.apps.BboardConfig',
+    'testapp',
 ]
 
 MIDDLEWARE = [

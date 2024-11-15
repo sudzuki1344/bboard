@@ -140,6 +140,17 @@ class Bb(models.Model):
 
     class Meta:
         ordering = ['-published', 'title']
+        # order_with_respect_to = "rubric"
         unique_together = ('title', 'published')
         verbose_name = 'Объявление'
         verbose_name_plural = 'Объявления'
+
+class test(models.Model):
+    name1 = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Test',
+    )
+
+    def __str__(self):
+        return self.name1
