@@ -6,6 +6,7 @@ from django.views.generic.edit import CreateView
 
 # from bboard.forms import BbForm
 from bboard.models import Bb, Rubric
+from django.db.models import Count
 
 
 def index(request):
@@ -18,7 +19,8 @@ def index(request):
 
 def by_rubric(request, rubric_id):
     bbs = Bb.objects.filter(rubric=rubric_id)
-    rubrics = Rubric.objects.all()
+    # rubrics = Rubric.objects.all()
+    rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
     current_rubric = Rubric.objects.get(pk=rubric_id)
 
     # bbs = current_rubric.objects.all()
@@ -35,5 +37,5 @@ class BbCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.all()
+        context['rubrics'] = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
         return context
