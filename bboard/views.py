@@ -5,12 +5,17 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views.generic.edit import CreateView
 
+from django import forms
 from bboard.forms import BbForm
 from bboard.models import Bb, Rubric
 from django.db.models import Count
 
 
 def index(request):
+    # a = request.META
+    # b = ""
+
+
 
     print(request.headers)
     print(request.META)
@@ -87,6 +92,13 @@ def add_save(request):
         return render(request, 'bboard/bb_create.html', context)
 
 def add_and_save(request):
+
+    for a in request.META:
+        with open('1.txt', 'r') as file:
+            file.write(str(a))
+
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('bboard:index'))
     if request.method == 'POST':
         bbf = BbForm(request.POST)
         if bbf.is_valid():
