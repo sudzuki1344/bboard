@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'bboard', 'hw',  # 'bboard.apps.BboardConfig',
-    'testapp',
+    'testapp', 'todolist',
 ]
 
 MIDDLEWARE = [
