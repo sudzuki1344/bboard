@@ -21,7 +21,8 @@ def index(request):
 
     return render(request, 'bboard/index.html', context)
 
-class Index1(View):
+class Index1(TemplateView):
+    template_name = 'bboard/index.html'
     def get(self, request):
         bbs = Bb.objects.order_by('-published')
         rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)

@@ -1,4 +1,7 @@
-from django.shortcuts import render, redirect
+from django.http import Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_protect
+
 from todolist.models import Todo
 from todolist.urls import *
 from todolist.forms import TodoForm
@@ -14,9 +17,18 @@ def todo_list(request):
 
     pass
 
-def todo_detail():
 
-    pass
+def todo_detail(request, todo_id):
+    try:
+        todo = get_object_or_404(Todo, pk=todo_id)
+
+    except todo.DoesNotExist:
+        return Http404('Такое обьявлени не существует')
+
+    context = {'todo': todo}
+
+    return render(request, 'todolist/bb_detail.html', context)
+
 
 def todo_create(request):
     if request.method == 'POST':
@@ -34,8 +46,18 @@ def todo_create(request):
         context = {'form': todo}
         return render(request, 'todolist/create.html', context)
 
-def todo_delete():
 
-    pass
+@csrf_protect
+def todo_delete(request, todo_id):
 
+    todo = get_object_or_404(Todo, pk=todo_id)
 
+    context = {'todo': todo}
+
+    if request.method == 'POST':
+
+        todo.delete()
+
+        return redirect('todolist:index')
+
+    return render(request, 'todolist/delete.html', context)
