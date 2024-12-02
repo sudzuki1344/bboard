@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import require_http_methods, require_GET, require_POST, require_safe
 from django.views.generic.edit import CreateView
+from django.views.generic.base import View, TemplateView
 
 from django import forms
 from bboard.forms import BbForm
@@ -74,31 +75,42 @@ def by_rubric(request, rubric_id):
 
     return render(request, 'bboard/by_rubric.html', context)
 
-
-class BbCreateView(CreateView):
-    template_name = 'bboard/create.html'
-    # form_class = BbForm
-    success_url = reverse_lazy('bboard:index')
+class BbRubricBbsView(TemplateView):
+    template_name = 'bboard/rubric_bbs.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+        context["bbs"] = Bb.objects.filter(rubric=context['rubric_id'])
+        context["rubrics"] = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+        context['current_rubric'] = Rubric.objects.get(pk=context["rubric_id"])
         return context
 
 
-def add(request):
-    bbf = BbForm()
-    context = {'form': bbf}
-    return render(request, 'bboard/bb_create.html', context)
+# class BbCreateView(CreateView):
+#     template_name = 'bboard/bb_create.html'
+#     model = Bb
+#     form_class = BbForm
+#     success_url = reverse_lazy('bboard:index')
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['rubrics'] = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+#         return context
 
-def add_save(request):
-    bbf = BbForm(request.POST)
-    if bbf.is_valid():
-        bbf.save()
-        return HttpResponseRedirect(reverse('bboard:by_rubric', kwargs={'rubric_id': bbf.cleaned_data['rubric'].pk}))
-    else:
-        context = {'form': bbf}
+class BbCreateView(View):
+    def get(self, request, *args, **kwargs):
+        form = BbForm
+        context = {'form': form, 'rubrics': Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)}
         return render(request, 'bboard/bb_create.html', context)
+
+    def post(self, request, *args, **kwargs):
+        form = BbForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('bboard:by_rubric', rubric_id=form.cleaned_data['rubric'].pk)
+        else:
+            context = {'form': form, 'rubrics': Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)}
+            return render(request, 'bboard/bb_create.html', context)
 
 @require_http_methods(['GET', 'POST'])
 def add_and_save(request):
