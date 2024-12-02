@@ -21,6 +21,13 @@ def index(request):
 
     return render(request, 'bboard/index.html', context)
 
+class Index1(View):
+    def get(self, request):
+        bbs = Bb.objects.order_by('-published')
+        rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+        context = {'bbs': bbs, 'rubrics': rubrics}
+        return render(request, 'bboard/index.html', context)
+
 # def index(request):
 #
 #     data = {'title': 'Мотоцикл', 'content': 'Старый', 'price': 10_000.0}
@@ -149,4 +156,10 @@ def bb_detail(request, bb_id):
 
     return render(request, 'bboard/bb_detail.html', context)
 
+class BbDetail(View):
+    def get(self, request, bb_id):
+        rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+        bb = get_object_or_404(Bb, pk=bb_id)
+        context = {'bb': bb, 'rubrics': rubrics}
+        return render(request, 'bboard/bb_detail.html', context)
 
