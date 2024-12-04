@@ -1,0 +1,15 @@
+{% extends "layout/basic.html" %}
+
+
+
+{% block title %}Получение{% endblock %}
+
+{% block content %}
+<h2>Получение</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Получить</button>
+    </form>
+{% endblock %}

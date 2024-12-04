@@ -1,0 +1,11 @@
+{% extends "layout/basic.html" %}
+
+{% block content %}
+    {% for todo in todos %}
+    <div>
+        <h2>{{ todo.title }}</h2>
+        <p>{{ todo.content }}</p>
+        <p>{{ todo.published|date:"d.m.Y H:i:s" }}</p>
+    </div>
+    {% endfor %}
+{% endblock %}
