@@ -4,19 +4,24 @@
 
     {% with bb_count=bbs.count %}
         {% if bb_count > 0 %}
-            <p>Всего {{ bb_count }} обьявлений.</p>
+            {# Домашка #}
+            <p>Всего {{ bb_count|add:10 }} обьявлений.</p>
         {% endif %}
     {% endwith %}
 
     {% for bb in bbs %}
     <div>
         <h2>
-            <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title_and_price }}</a>
+            {# Домашка #}
+            <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title_and_price|lower }}</a>
         </h2>
         <p>{{ bb.content }}</p>
         <p><a href="{% url 'bboard:by_rubric' bb.rubric.pk %}">
             {{ bb.rubric.name }}</a></p>
         <p>{{ bb.published|date:"d.m.Y H:i:s" }}</p>
     </div>
+    {# Домашка #}
+    {% empty %}
+        <li>Простите, нет страницы</li>
     {% endfor %}
 {% endblock %}

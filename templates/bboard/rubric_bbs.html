@@ -24,8 +24,10 @@
         {% endifchanged %}
 
         <p>{{ bb.published|date:"d.m.Y H:i:s" }}</p>
-
-        {% firstof bb.phone bb.email 'На деревню дедушке' %}
+        {# Домашка #}
+        {% comment 'Домашка' %}
+            {% firstof bb.phone bb.email 'На деревню дедушке' %}
+        {% endcomment %}
     </div>
     {% endfor %}
 
