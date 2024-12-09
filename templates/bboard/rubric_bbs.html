@@ -4,13 +4,35 @@
 {% block title %}{{ current_rubric }}{% endblock %}
 
 {% block content %}
+    <h2>Рубрика: {{ current_rubric.name }}</h2>
     {% for bb in bbs %}
-    <div>
-        <h2>
-            <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title }}</a>
+    {% url 'bboard:detail' bb.pk as detail_url %}
+    <div class="{% cycle 'bb1' 'bb2' %}">
+        {% if forloop.first %}
+            <h2 style="font-size: 49px">{{ forloop.counter }}.
+                <a href="{{ detail_url }}">{{ bb.title }}</a>
         </h2>
+        {% else %}
+            <h2>{{ forloop.counter }}.
+                <a href="{{ detail_url }}">{{ bb.title }}</a>
+        </h2>
+        {% endif %}
         <p>{{ bb.content }}</p>
+
+        {% ifchanged bb.rubric.pk %}
+            <p><a href="{% url 'bboard:by_rubric' bb.rubric.pk %}">{{ bb.rubric.name }}</a></p>
+        {% endifchanged %}
+
         <p>{{ bb.published|date:"d.m.Y H:i:s" }}</p>
+
+        {% firstof bb.phone bb.email 'На деревню дедушке' %}
     </div>
     {% endfor %}
+
+
+    {% comment %}
+        {% lorem 5 p %}
+        {% debug %}
+    {% endcomment %}
+
 {% endblock %}

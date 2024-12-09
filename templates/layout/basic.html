@@ -19,8 +19,8 @@
     <a href="{% url 'bboard:index' %}">Главная</a>
     <a href="{% url 'bboard:add' %}">Добавить</a>
     {% for rubric in rubrics %}
-        <a href="{% url 'bboard:by_rubric' rubric.pk %}">{{ rubric.name }} ({{ rubric.cnt }})</a>
-{#        <a href="{{ rubric.get_absolute_url }}">{{ rubric.name }}</a>#}
+        <a href="{% url 'bboard:by_rubric' rubric.pk %}">{{ rubric.name }}
+            ({{ rubric.cnt }})</a>
     {% endfor %}
 </nav>
 
@@ -28,6 +28,10 @@
     {% block content %}
     {% endblock %}
 </section>
+
+<footer>
+    {% now 'SHORT_DATETIME_FORMAT' %}
+</footer>
 
 </body>
 </html>

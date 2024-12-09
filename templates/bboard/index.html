@@ -1,12 +1,18 @@
 {% extends "layout/basic.html" %}
 
 {% block content %}
+
+    {% with bb_count=bbs.count %}
+        {% if bb_count > 0 %}
+            <p>Всего {{ bb_count }} обьявлений.</p>
+        {% endif %}
+    {% endwith %}
+
     {% for bb in bbs %}
     <div>
-        {# <h2>{{ bb.title }}</h2> #}
         <h2>
-            <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title_and_price }}</h2>
-        </a>
+            <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title_and_price }}</a>
+        </h2>
         <p>{{ bb.content }}</p>
         <p><a href="{% url 'bboard:by_rubric' bb.rubric.pk %}">
             {{ bb.rubric.name }}</a></p>

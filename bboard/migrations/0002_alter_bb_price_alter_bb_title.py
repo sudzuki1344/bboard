@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='bb',
             name='price',
-            field=models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15, null=True, validators=[bboard.models.validation_even], verbose_name='Цена'),
+            field=models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=15, null=True, validators=[bboard.models.validate_even], verbose_name='Цена'),
         ),
         migrations.AlterField(
             model_name='bb',

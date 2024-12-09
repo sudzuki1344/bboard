@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,8 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'bboard', 'hw',  # 'bboard.apps.BboardConfig',
-    'testapp', 'todolist',
+    'bboard',  # 'bboard.apps.BboardConfig',
+    'testapp',
+    # 'todolist',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +60,7 @@ ROOT_URLCONF = 'samplesite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # 'BACKEND': 'django.template.backends.jinja2.Jinja2',
         'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -128,7 +132,9 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # ABSOLUTE_URL_OVERRIDES = {
 #     'bboard.rubric': lambda rec: f"{rec.pk}/"
 # }
 
+DEFAULT_CHARSET = 'utf-8'
