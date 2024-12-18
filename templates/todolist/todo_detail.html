@@ -6,8 +6,8 @@
 {% block content %}
     <div>
         <h2>{{ bb.title }}</h2>
-        <p>Цена: <strong>{{ bb.price }}</strong> тг.</p>
         <p>{{ bb.content }}</p>
+        <p>Цена: <strong>{{ bb.price }}</strong> тг.</p>
         <p>
             <a href="{% url 'bboard:by_rubric' bb.rubric.pk %}">
                 {{ bb.rubric.name }}</a>

@@ -1,12 +1,13 @@
-from django.db import models
-from django.core import  validators
+from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 
-def validation_even(val):
+
+def validate_even(val):
     if val % 2 != 0:
         raise ValidationError('Число %(value)s нечётное', code='odd',
                               params={'value': val})
+
 
 class MinMaxValueValidator:
     def __init__(self, min_value, max_value):
@@ -15,9 +16,11 @@ class MinMaxValueValidator:
 
     def __call__(self, val):
         if val < self.min_value or val > self.max_value:
-            raise ValidationError('Введёное число должно находится в диапазоне'
-                                  'от %(min)s до %(max)s', code='odd',
-                                  params={'min': self.min_value, 'max': self.max_value})
+            raise ValidationError('Введённое число должно'
+                  'находиться в диапазоне от %(min)s до %(max)s',
+                  code='out_of_range',
+                  params={'min': self.min_value, 'max': self.max_value})
+
 
 
 class Rubric(models.Model):
@@ -28,6 +31,8 @@ class Rubric(models.Model):
         verbose_name='Название',
     )
 
+    order = models.SmallIntegerField(default=0, db_index=True)
+
     def __str__(self):
         return f'{self.name}'
 
@@ -35,16 +40,17 @@ class Rubric(models.Model):
     #     return f"{self.pk}/"
 
     # def save(self, *args, **kwargs):
+    #     # Действия перед сохранением
     #     super().save(*args, **kwargs)
+    #     # Действия после сохранением
     #
     # def delete(self, *args, **kwargs):
-    #     super().delete(self, *args, **kwargs)
-
-
+    #     super().delete(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Рубрика'
         verbose_name_plural = 'Рубрики'
+        ordering = ['order', 'name']
 
 
 class Bb(models.Model):
@@ -74,7 +80,7 @@ class Bb(models.Model):
     kind = models.CharField(
         max_length=1,
         choices=KINDS,
-        default='b',
+        default='s',
     )
 
     rubric = models.ForeignKey(
@@ -82,6 +88,7 @@ class Bb(models.Model):
         null=True,
         on_delete=models.PROTECT,
         verbose_name='Рубрика',
+        # related_name='entries',  # вместо bb_set
     )
 
     title = models.CharField(
@@ -105,7 +112,7 @@ class Bb(models.Model):
         blank=True,
         default=0,
         verbose_name='Цена',
-        validators=[validation_even]
+        # validators=[validate_even]
     )
 
     published = models.DateTimeField(
@@ -121,7 +128,7 @@ class Bb(models.Model):
 
     def title_and_price(self):
         if self.price:
-            return f"{self.title} ({self.price:.2f} тг.)"
+            return f'{self.title} ({self.price:.2f} тг.)'
         return self.title
 
     title_and_price.short_description = 'Название и цена'
@@ -130,8 +137,10 @@ class Bb(models.Model):
         errors = {}
         if not self.content:
             errors['content'] = ValidationError('Укажите описание товара')
+
         if self.price and self.price < 0:
-            errors['price'] = ValidationError('Укажите неотрицательное значение цены')
+            errors['price'] = ValidationError('Укажите неоьрицательное'
+                                              'значение цены')
         if errors:
             raise ValidationError(errors)
 
@@ -140,17 +149,8 @@ class Bb(models.Model):
 
     class Meta:
         ordering = ['-published', 'title']
-        # order_with_respect_to = "rubric"
+        # order_with_respect_to = 'rubric'
+
         unique_together = ('title', 'published')
         verbose_name = 'Объявление'
         verbose_name_plural = 'Объявления'
-
-class test(models.Model):
-    name1 = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='Test',
-    )
-
-    def __str__(self):
-        return self.name1

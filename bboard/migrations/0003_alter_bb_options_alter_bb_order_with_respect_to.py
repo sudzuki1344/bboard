@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bboard', '0006_test'),
+        ('bboard', '0002_alter_bb_price_alter_bb_title'),
     ]
 
     operations = [
