@@ -26,6 +26,8 @@ from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteVi
 from bboard.forms import BbForm, RubricBaseFormSet
 from bboard.models import Bb, Rubric
 
+from bboard.forms import ExampleModelFormSet
+
 
 # Основной (вернуть)
 # def index(request):
@@ -291,4 +293,17 @@ class UserDetailView(DetailView):
             except ValueError:
                 pass  # Игнорируем ошибки конвертации
         return super().get(request, *args, **kwargs)
+
+
+def example_view(request):
+    if request.method == "POST":
+        formset = ExampleModelFormSet(request.POST)
+        if formset.is_valid():  # Проверка валидности формы
+            formset.save()  # Сохранение валидных данных в базу
+            return redirect('success_url')  # Перенаправление после успешной обработки
+        else:
+            return render(request, 'example_template.html', {'formset': formset})
+    else:
+        formset = ExampleModelFormSet(queryset=ExampleModel.objects.all())
+        return render(request, 'example_template.html', {'formset': formset})
 

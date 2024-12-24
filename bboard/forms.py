@@ -6,7 +6,7 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric
+from bboard.models import Bb, Rubric, ExampleModel
 
 
 # Основной (вернуть)
@@ -117,3 +117,10 @@ class RubricBaseFormSet(BaseModelFormSet):
             or ('Мебель' not in names):
             raise ValidationError(
                 'Добавьте рубрики недвижимости, транспорта и мебели')
+
+
+ExampleModelFormSet = modelformset_factory(
+    ExampleModel,
+    fields=('name', 'description'),
+    extra=1  # Дополнительная пустая форма
+)
