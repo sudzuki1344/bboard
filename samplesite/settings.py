@@ -139,3 +139,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # }
 
 DEFAULT_CHARSET = 'utf-8'
+
+# LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = 'bboard:index'
+LOGOUT_REDIRECT_URL = 'bboard:index'
+# PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 3  # 259_200

@@ -6,7 +6,7 @@ from bboard.models import Bb
 from bboard.views import (index, by_rubric, BbCreateView,
                           add_and_save, bb_detail, BbRubricBbsView,
                           BbDetailView, BbEditView, BbDeleteView, BbIndexView,
-                          BbRedirectView, edit, rubrics,contact_view, bbs)
+                          BbRedirectView, edit, rubrics, bbs, UserListView, UserDetailView)
 
 app_name = 'bboard'
 
@@ -21,8 +21,10 @@ urlpatterns = [
     path('<int:year>/<int:month>/<int:day>/', BbRedirectView.as_view(),
          name='old_archive'),
 
+    path('users/', UserListView.as_view(), name='user-list'),
+    path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+
     path('rubrics/', rubrics, name='rubrics'),
-    path('contact/', contact_view, name='contact'),
     path('bbs/<int:rubric_id>/', bbs, name='bbs'),
 
     path('add/', BbCreateView.as_view(), name='add'),
@@ -34,6 +36,7 @@ urlpatterns = [
     path('<int:rubric_id>/', BbRubricBbsView.as_view(), name='by_rubric'),
 
     path('detail/<int:pk>/', BbDetailView.as_view(), name='detail'),
+
 
     path('', index, name='index'),
     # path('', BbIndexView.as_view(), name='index'),

@@ -6,7 +6,7 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric, Contact
+from bboard.models import Bb, Rubric
 
 
 # Основной (вернуть)
@@ -104,23 +104,16 @@ class RegisterUserForm(ModelForm):
                   'first_name', 'last_name')
 
 
-RubricFormSet = modelformset_factory(Rubric, fields=("name",), can_order=True, can_delete=True)
+RubricFormSet = modelformset_factory(Rubric, fields=('name',),
+                                     can_order=True, can_delete=True)
+
 
 class RubricBaseFormSet(BaseModelFormSet):
     def clean(self):
         super().clean()
-        names = [form.cleaned_data['name'] for form in self.forms if 'name' in form.cleaned_data]
-        if ('Недвижимость' not in names) or ('Транспорт' not in names) or ('Мебель' not in names):
-            raise ValidationError('Добавьте рубрики недвижимости, мебели, транспорта')
-
-
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-        fields = ['name', 'email', 'message']
-
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if not email.endswith('@example.com'):
-            raise forms.ValidationError("Email должен заканчиваться на '@example.com'.")
-        return email
+        names = [form.cleaned_data['name'] for form in self.forms \
+                 if 'name' in form.cleaned_data]
+        if ('Недвижимость' not in names) or ('Транспорт' not in names) \
+            or ('Мебель' not in names):
+            raise ValidationError(
+                'Добавьте рубрики недвижимости, транспорта и мебели')

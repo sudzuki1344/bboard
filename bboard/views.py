@@ -1,7 +1,10 @@
-from html.parser import commentclose
-
+from django.contrib.auth import get_user
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.forms import modelformset_factory
+from django.forms.models import inlineformset_factory
 from django.http import (HttpResponse, HttpResponseRedirect, HttpResponseNotFound,
                          Http404, StreamingHttpResponse, FileResponse, JsonResponse)
 from django.shortcuts import render, redirect, get_object_or_404, get_list_or_404
@@ -10,16 +13,19 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import (require_http_methods,
                                           require_GET, require_POST, require_safe)
+
+from django.contrib.auth.models import User
+
 from django.views.generic.base import RedirectView
 from django.views.generic.dates import ArchiveIndexView
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
-from django.forms.models import inlineformset_factory
 
-from bboard.forms import BbForm, RubricFormSet, modelformset_factory, RubricBaseFormSet, ContactForm
+from bboard.forms import BbForm, RubricBaseFormSet
 from bboard.models import Bb, Rubric
+
 
 # Основной (вернуть)
 # def index(request):
@@ -119,12 +125,15 @@ class BbRubricBbsView(ListView):
 
 
 # Основной (вернуть)
-class BbCreateView(CreateView):
+class BbCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     template_name = 'bboard/bb_create.html'
     model = Bb
     form_class = BbForm
     success_url = reverse_lazy('bboard:index')
     # initial = {'price': 1000.0}
+
+    def test_func(self):
+        return self.request.user.is_staff
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -217,8 +226,17 @@ class BbDeleteView(DeleteView):
                                             cnt=Count('bb')).filter(cnt__gt=0)
         return context
 
+
+@login_required(login_url='/login/')
+@user_passes_test(lambda user: user.is_staff)
+# @permission_required('bboard.add_rubric')
 def rubrics(request):
-    RubricFormSet = modelformset_factory(Rubric, fields=('name',), can_order=True, can_delete=True, extra=3, formset=RubricBaseFormSet)
+    RubricFormSet = modelformset_factory(Rubric, fields=('name',),
+                                         can_order=True,
+                                         can_delete=True,
+                                         formset=RubricBaseFormSet,
+                                         # extra=3
+                                         )
 
     if request.method == 'POST':
         formset = RubricFormSet(request.POST)
@@ -234,14 +252,15 @@ def rubrics(request):
                             rubric.order = form['ORDER'].data
                         rubric.save()
             return redirect('bboard:index')
-
     else:
         formset = RubricFormSet()
     context = {'formset': formset}
     return render(request, 'bboard/rubrics.html', context)
 
+
 def bbs(request, rubric_id):
-    BbsFormSet = inlineformset_factory(Rubric, Bb, form=BbForm, extra=1)
+    BbsFormSet = inlineformset_factory(Rubric, Bb,
+                                       form=BbForm, extra=1)
     rubric = Rubric.objects.get(pk=rubric_id)
     if request.method == 'POST':
         formset = BbsFormSet(request.POST, instance=rubric)
@@ -253,22 +272,23 @@ def bbs(request, rubric_id):
     context = {'formset': formset, 'current_rubric': rubric}
     return render(request, 'bboard/bbs.html', context)
 
+class UserListView(ListView):
+    model = User
+    template_name = 'bboard/user_list.html'  # Укажите путь к шаблону
+    context_object_name = 'users'
 
-def contact_view(request):
-    if request.method == "POST":
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            # Сохраняем данные в случае успешной валидации
-            form.save()
-            return render(request, 'bboard/success.html', {'message': 'Форма успешно отправлена!'})
-        else:
-            # Возвращаем форму с ошибками
-            return render(request, 'bboard/contact.html', {'form': form, 'error': 'Проверьте данные и попробуйте снова.'})
-    else:
-        # Отображение пустой формы
-        form = ContactForm()
-        return render(request, 'bboard/contact.html', {'form': form})
+class UserDetailView(DetailView):
+    model = User
+    template_name = 'bboard/user_detail.html'  # Укажите путь к шаблону
+    context_object_name = 'user'
 
-
-
+    def get(self, request, *args, **kwargs):
+        user_id = request.GET.get('user_id')
+        if user_id:  # Если передан ID пользователя
+            try:
+                user_id = int(user_id)
+                return HttpResponseRedirect(reverse('bboard/user_detail', kwargs={'pk': user_id}))
+            except ValueError:
+                pass  # Игнорируем ошибки конвертации
+        return super().get(request, *args, **kwargs)
 

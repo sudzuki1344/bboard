@@ -13,12 +13,3 @@ class Spare(models.Model):
 class Machine(models.Model):
     name = models.CharField(max_length=30)
     spares = models.ManyToManyField(Spare)
-
-
-class Course(models.Model):
-    name = models.CharField(max_length=30)
-
-
-class Student(models.Model):
-    name = models.CharField(max_length=30)
-    courses = models.ManyToManyField(Course)
