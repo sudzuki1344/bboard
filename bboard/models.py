@@ -154,3 +154,14 @@ class Bb(models.Model):
         unique_together = ('title', 'published')
         verbose_name = 'Объявление'
         verbose_name_plural = 'Объявления'
+
+
+
+class Contact(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.email})"

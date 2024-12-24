@@ -18,7 +18,7 @@ from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 from django.forms.models import inlineformset_factory
 
-from bboard.forms import BbForm, RubricFormSet, modelformset_factory, RubricBaseFormSet
+from bboard.forms import BbForm, RubricFormSet, modelformset_factory, RubricBaseFormSet, ContactForm
 from bboard.models import Bb, Rubric
 
 # Основной (вернуть)
@@ -252,6 +252,23 @@ def bbs(request, rubric_id):
         formset = BbsFormSet(instance=rubric)
     context = {'formset': formset, 'current_rubric': rubric}
     return render(request, 'bboard/bbs.html', context)
+
+
+def contact_view(request):
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            # Сохраняем данные в случае успешной валидации
+            form.save()
+            return render(request, 'bboard/success.html', {'message': 'Форма успешно отправлена!'})
+        else:
+            # Возвращаем форму с ошибками
+            return render(request, 'bboard/contact.html', {'form': form, 'error': 'Проверьте данные и попробуйте снова.'})
+    else:
+        # Отображение пустой формы
+        form = ContactForm()
+        return render(request, 'bboard/contact.html', {'form': form})
+
 
 
 
