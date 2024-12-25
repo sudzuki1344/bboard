@@ -41,6 +41,13 @@ class Rubric(models.Model):
         verbose_name_plural = 'Рубрики'
         ordering = ['order', 'name']
 
+#Прокси
+class RevRubric(Rubric):
+
+    class Meta:
+        proxy = True
+        ordering = ['-name']
+
 
 class Bb(models.Model):
     # KINDS = (
@@ -143,8 +150,3 @@ class Bb(models.Model):
         unique_together = ('title', 'published')
         verbose_name = 'Объявление'
         verbose_name_plural = 'Объявления'
-
-class ExampleModel(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)

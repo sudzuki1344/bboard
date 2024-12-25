@@ -13,9 +13,6 @@ from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
 from django.views.decorators.http import (require_http_methods,
                                           require_GET, require_POST, require_safe)
-
-from django.contrib.auth.models import User
-
 from django.views.generic.base import RedirectView
 from django.views.generic.dates import ArchiveIndexView
 from django.views.generic.list import ListView
@@ -25,8 +22,6 @@ from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteVi
 
 from bboard.forms import BbForm, RubricBaseFormSet
 from bboard.models import Bb, Rubric
-
-from bboard.forms import ExampleModelFormSet
 
 
 # Основной (вернуть)
@@ -273,37 +268,3 @@ def bbs(request, rubric_id):
         formset = BbsFormSet(instance=rubric)
     context = {'formset': formset, 'current_rubric': rubric}
     return render(request, 'bboard/bbs.html', context)
-
-class UserListView(ListView):
-    model = User
-    template_name = 'bboard/user_list.html'  # Укажите путь к шаблону
-    context_object_name = 'users'
-
-class UserDetailView(DetailView):
-    model = User
-    template_name = 'bboard/user_detail.html'  # Укажите путь к шаблону
-    context_object_name = 'user'
-
-    def get(self, request, *args, **kwargs):
-        user_id = request.GET.get('user_id')
-        if user_id:  # Если передан ID пользователя
-            try:
-                user_id = int(user_id)
-                return HttpResponseRedirect(reverse('bboard/user_detail', kwargs={'pk': user_id}))
-            except ValueError:
-                pass  # Игнорируем ошибки конвертации
-        return super().get(request, *args, **kwargs)
-
-
-def example_view(request):
-    if request.method == "POST":
-        formset = ExampleModelFormSet(request.POST)
-        if formset.is_valid():  # Проверка валидности формы
-            formset.save()  # Сохранение валидных данных в базу
-            return redirect('success_url')  # Перенаправление после успешной обработки
-        else:
-            return render(request, 'example_template.html', {'formset': formset})
-    else:
-        formset = ExampleModelFormSet(queryset=ExampleModel.objects.all())
-        return render(request, 'example_template.html', {'formset': formset})
-
