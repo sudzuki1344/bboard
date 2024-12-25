@@ -47,6 +47,12 @@ class PrivateMessage(Message):
     class Meta:
         ordering = []
 
+class SuperPrivateMessage(PrivateMessage):
+
+    class Meta:
+        proxy = True
+        ordering = ['-published']
+
 #Абстрактное
 # class Message(models.Model):
 #     content = models.TextField()
