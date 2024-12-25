@@ -51,7 +51,7 @@ class SuperPrivateMessage(PrivateMessage):
 
     class Meta:
         proxy = True
-        ordering = ['-published']
+        ordering = ['-message']
 
 #Абстрактное
 # class Message(models.Model):
