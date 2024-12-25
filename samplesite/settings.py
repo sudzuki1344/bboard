@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES
 
@@ -144,3 +145,23 @@ DEFAULT_CHARSET = 'utf-8'
 LOGIN_REDIRECT_URL = 'bboard:index'
 LOGOUT_REDIRECT_URL = 'bboard:index'
 # PASSWORD_RESET_TIMEOUT = 60 * 60 * 24 * 3  # 259_200
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'request_logs.txt'),  # Файл для логов
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+

@@ -8,6 +8,10 @@ from bboard.views import (index, by_rubric, BbCreateView,
                           BbDetailView, BbEditView, BbDeleteView, BbIndexView,
                           BbRedirectView, edit, rubrics, bbs)
 
+from django.contrib.auth.views import LoginView
+
+from . import views
+
 app_name = 'bboard'
 
 urlpatterns = [
@@ -23,6 +27,9 @@ urlpatterns = [
 
     path('rubrics/', rubrics, name='rubrics'),
     path('bbs/<int:rubric_id>/', bbs, name='bbs'),
+
+    path('login/', LoginView.as_view(template_name='bboard/login.html'), name='login'),
+    path('protected/', views.protected_view, name='protected_view'),
 
     path('add/', BbCreateView.as_view(), name='add'),
     path('edit/<int:pk>/', BbEditView.as_view(), name='edit'),

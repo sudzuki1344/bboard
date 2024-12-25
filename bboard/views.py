@@ -23,6 +23,7 @@ from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteVi
 from bboard.forms import BbForm, RubricBaseFormSet
 from bboard.models import Bb, Rubric
 
+import logging
 
 # Основной (вернуть)
 # def index(request):
@@ -224,8 +225,8 @@ class BbDeleteView(DeleteView):
         return context
 
 
-@login_required(login_url='/login/')
-@user_passes_test(lambda user: user.is_staff)
+# @login_required(login_url='/login/')
+# @user_passes_test(lambda user: user.is_staff)
 # @permission_required('bboard.add_rubric')
 def rubrics(request):
     RubricFormSet = modelformset_factory(Rubric, fields=('name',),
@@ -268,3 +269,12 @@ def bbs(request, rubric_id):
         formset = BbsFormSet(instance=rubric)
     context = {'formset': formset, 'current_rubric': rubric}
     return render(request, 'bboard/bbs.html', context)
+
+logger = logging.getLogger('django.request')
+
+@login_required(login_url='/login/')  # Перенаправление, если пользователь не авторизован
+def protected_view(request):
+    # Логируем данные запроса
+    logger.info(f"Request Method: {request.method}, Path: {request.path}, Data: {request.body}")
+    # Отображаем защищённый шаблон
+    return render(request, 'bboard/protected_view.html')
