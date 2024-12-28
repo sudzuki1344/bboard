@@ -20,3 +20,4 @@ Request Method: GET, Path: /protected/, Data: b''
 Request Method: GET, Path: /protected/, Data: b''
 Not Found: /logout/
 Request Method: GET, Path: /protected/, Data: b''
+Not Found: /favicon.ico
