@@ -1,0 +1,10 @@
+<h1>Create Task</h1>
+<form method="post">
+    {% csrf_token %}
+    <label>Title:</label>
+    <input type="text" name="title" required>
+    <label>Description:</label>
+    <textarea name="description"></textarea>
+    <button type="submit">Create</button>
+</form>
+<a href="{% url 'hw:task_list' %}">Back to List</a>
