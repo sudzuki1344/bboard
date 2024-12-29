@@ -41,5 +41,6 @@ urlpatterns = [
 
     path('hw/', include('hw.urls', namespace='hw')),
     # path('todo/', include('todolist.urls', namespace='todo')),
+    path('testapp/', include('testapp.urls', namespace='testapp')),
     path('', include('bboard.urls', namespace='bboard')),
 ]

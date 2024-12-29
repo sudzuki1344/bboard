@@ -67,3 +67,12 @@ class SuperPrivateMessage(PrivateMessage):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)
 #     name = models.CharField(max_length=40)
 #     email = None
+
+class SMS(models.Model):
+    sender = models.CharField(max_length=255)
+    receiver = models.CharField(max_length=255)
+    message = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"From: {self.sender}, To: {self.receiver} - {self.sent_at}"
