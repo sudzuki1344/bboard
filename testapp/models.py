@@ -13,12 +13,28 @@ class Spare(models.Model):
     name = models.CharField(max_length=30)
     notes = GenericRelation('Note', related_query_name='spare')
 
+class MachineQuerySet(models.QuerySet):
+    def order_by_name(self):
+        return self.annotate().order_by('-name')
+
+
+class MachineManager(models.Manager):
+    def get_queryset(self):
+        return MachineQuerySet(self.model, using=self._db)
+
+    def order_by_name(self):
+        return self.get_queryset().order_by_name()
 
 class Machine(models.Model):
     name = models.CharField(max_length=30)
     spares = models.ManyToManyField(Spare, through='Kit',
                                     through_fields=('machine', 'spare'))
     notes = GenericRelation('Note')
+
+    objects = MachineManager()
+
+    def __str__(self):
+        return f'{self.name}'
 
 
 class Kit(models.Model):
