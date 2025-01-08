@@ -1,7 +1,7 @@
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 
 class AdvUser(models.Model):
@@ -31,8 +31,11 @@ class Note(models.Model):
     content = models.TextField()
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey(ct_field="content_type", fk_field="object_id")
-#Прямое
+    content_object = GenericForeignKey(ct_field='content_type',
+                                       fk_field='object_id')
+
+
+# 1. Прямое наследование
 class Message(models.Model):
     content = models.TextField()
     published = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -40,20 +43,17 @@ class Message(models.Model):
     class Meta:
         ordering = ['-published']
 
+
 class PrivateMessage(Message):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.OneToOneField(Message, on_delete=models.CASCADE, parent_link=True)
+    message = models.OneToOneField(Message, on_delete=models.CASCADE,
+                                   parent_link=True)
 
     class Meta:
         ordering = []
 
-class SuperPrivateMessage(PrivateMessage):
 
-    class Meta:
-        proxy = True
-        ordering = ['-content']
-
-#Абстрактное
+# 2. Абстрактные модели
 # class Message(models.Model):
 #     content = models.TextField()
 #     name = models.CharField(max_length=20)
@@ -61,18 +61,13 @@ class SuperPrivateMessage(PrivateMessage):
 #
 #     class Meta:
 #         abstract = True
-#         ordering = ['name']
+#         # ordering = ['name']
+#
 #
 # class PrivateMessage(Message):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)
 #     name = models.CharField(max_length=40)
 #     email = None
-
-class SMS(models.Model):
-    sender = models.CharField(max_length=255)
-    receiver = models.CharField(max_length=255)
-    message = models.TextField()
-    sent_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"From: {self.sender}, To: {self.receiver} - {self.sent_at}"
+#
+#     # class Meta:
+#         # ordering = ['order', 'name']

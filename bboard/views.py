@@ -2,6 +2,7 @@ from django.contrib.auth import get_user
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
+from django.db import transaction, DatabaseError
 from django.db.models import Count
 from django.forms import modelformset_factory
 from django.forms.models import inlineformset_factory
@@ -23,7 +24,6 @@ from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteVi
 from bboard.forms import BbForm, RubricBaseFormSet
 from bboard.models import Bb, Rubric
 
-import logging
 
 # Основной (вернуть)
 # def index(request):
@@ -225,8 +225,8 @@ class BbDeleteView(DeleteView):
         return context
 
 
-# @login_required(login_url='/login/')
-# @user_passes_test(lambda user: user.is_staff)
+@login_required(login_url='/login/')
+@user_passes_test(lambda user: user.is_staff)
 # @permission_required('bboard.add_rubric')
 def rubrics(request):
     RubricFormSet = modelformset_factory(Rubric, fields=('name',),
@@ -270,11 +270,56 @@ def bbs(request, rubric_id):
     context = {'formset': formset, 'current_rubric': rubric}
     return render(request, 'bboard/bbs.html', context)
 
-logger = logging.getLogger('django.request')
 
-@login_required(login_url='/login/')  # Перенаправление, если пользователь не авторизован
-def protected_view(request):
-    # Логируем данные запроса
-    logger.info(f"Request Method: {request.method}, Path: {request.path}, Data: {request.body}")
-    # Отображаем защищённый шаблон
-    return render(request, 'bboard/protected_view.html')
+def commit_handler():
+    pass
+    # Действия после подтверждения транзакции
+
+
+# @transaction.non_atomic_requests  # не атомарные  'ATOMIC_REQUEST': False,
+# @transaction.atomic               # атомарные     'ATOMIC_REQUEST': True,
+def my_view(request):
+    # if formset.is_valid():
+    #     with transaction.atomic():
+    #         for form in formset:
+    #             if form.cleaned_data:
+    #                 with transaction.atomic():
+    #                     pass
+
+    # try:
+    #     with transaction.atomic():
+    #         # сохранить данные в БД
+    #         pass
+    # except DatabaseError:
+    #     # Реагируем на ошибки
+    #     pass
+
+    # bbs = Bb.objects.select_for_updates().filter(price__lt=100)
+    bbs = Bb.objects.select_for_updates(skip_locked=True,
+                                        of=('self', 'rubric')).filter(price__lt=100)
+    # with transaction.atomic():
+    #     for bb in bbs:
+    #         bb.price = 100
+    #         bb.save()
+
+    # if form.is_valid():
+    #     try:
+    #         form.save()
+    #         transaction.commit()
+    #     except:
+    #         transaction.rollback()
+
+    # if formset.is_valid():
+    #     for form in formset:
+    #         if form.cleaned_data:
+    #             sp = transaction.savepoint()
+    #             try:
+    #                 form.save()
+    #                 transaction.savepoint_commit(sp)
+    #             except:
+    #                 transaction.savepoint_rollback(sp)
+    #             transaction.commit()
+
+    #             transaction.on_commit(commit_handler)
+
+    return redirect('bboard:index')
