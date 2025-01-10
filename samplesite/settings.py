@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'captcha',
+
     'bboard',  # 'bboard.apps.BboardConfig',
     'testapp',
     # 'todolist',
@@ -84,8 +86,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        'ATOMIC_REQUEST': True,  # False,
-        'AUTOCOMMIT': False,     # True,
+        #'ATOMIC_REQUEST': True,  # False,
+        #'AUTOCOMMIT': False,     # True,
     }
 }
 
