@@ -7,7 +7,22 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric
+from bboard.models import Bb, Rubric, Img
+
+
+
+class ImgForm(ModelForm):
+    img = forms.ImageField(label='Изображение',
+                           validators=[validators.FileExtensionValidator(['jpg', 'jpeg', 'png'])],
+                           error_messages={
+                               'invalid_extension': 'Этот формат не поддерживается'
+                           })
+
+    desc = forms.CharField(label='Описание', widget=forms.widgets.Textarea())
+
+    class Meta:
+        model = Img
+        fields = '__all__'
 
 
 # Основной (вернуть)

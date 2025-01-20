@@ -344,3 +344,10 @@ def search(request):
 
     context = {'form': sf}
     return render(request, 'bboard/search.html', context)
+
+
+def delete_img(request, pk):
+    img = Img.objects.get(pk=pk)
+    img.img.delete(save=False)
+    img.delete()
+    return redirect('bboard:index')
