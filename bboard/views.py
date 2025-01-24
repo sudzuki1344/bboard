@@ -21,7 +21,7 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 
-from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
+from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, FileUploadForm
 from bboard.models import Bb, Rubric
 
 
@@ -351,3 +351,30 @@ def delete_img(request, pk):
     img.img.delete(save=False)
     img.delete()
     return redirect('bboard:index')
+
+def file_upload_view(request):
+    if request.method == 'POST':
+        form = FileUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()  # Сохраняем файл
+            return redirect('file_upload_success')  # Перенаправление на страницу успеха
+    else:
+        form = FileUploadForm()
+    return render(request, 'file_upload.html', {'form': form})
+
+
+def my_login(request):
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+    else:
+        return redirect('bboard:index', {'user':user})
+
+def my_logout(request):
+    logout(request)
+    return redirect('bboard:index')
+
+

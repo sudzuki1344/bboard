@@ -5,6 +5,20 @@ from django.db import models
 from datetime import datetime
 from os.path import splitext
 
+def validate_file_extension(file):
+    valid_extensions = ['.pdf', '.xlsx']
+    import os
+    ext = os.path.splitext(file.name)[1].lower()
+    if ext not in valid_extensions:
+        raise ValidationError('Допустимы только файлы PDF и XLSX.')
+
+class FileUpload(models.Model):
+    file = models.FileField(upload_to='uploads/', validators=[validate_file_extension])  # Добавляем валидатор
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"File {self.file.name} uploaded at {self.uploaded_at}"
+
 
 def get_timestamp_path(instance, filename):
     # return '%s%s' % (datetime.now().timestamp(), splitext(filename)[1])
@@ -35,7 +49,6 @@ class Img(models.Model):
     class Meta:
         verbose_name = 'Изображение'
         verbose_name_plural = 'Изображения'
-
 
 
 class RubricQuerySet(models.QuerySet):

@@ -7,7 +7,26 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric, Img
+from bboard.models import Bb, Rubric, Img, FileUpload
+
+
+from django import forms
+from .models import FileUpload
+
+class FileUploadForm(forms.ModelForm):
+    class Meta:
+        model = FileUpload
+        fields = ['file']
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        valid_extensions = ['.pdf', '.xlsx']
+        import os
+        ext = os.path.splitext(file.name)[1].lower()
+        if ext not in valid_extensions:
+            raise forms.ValidationError('Разрешены только файлы PDF и XLSX.')
+        return file
+
 
 
 

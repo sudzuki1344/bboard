@@ -20,6 +20,7 @@ from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView, \
     PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import path, include
+from bboard.views import my_login, my_logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
