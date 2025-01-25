@@ -1,27 +1,18 @@
-from django.core import validators
-from django.core.exceptions import ValidationError
-from django.db import models
-# from precise_bbcode.fields import BBCodeTextField
 from datetime import datetime
 from os.path import splitext
 
-def validate_file_extension(file):
-    valid_extensions = ['.pdf', '.xlsx']
-    import os
-    ext = os.path.splitext(file.name)[1].lower()
-    if ext not in valid_extensions:
-        raise ValidationError('Допустимы только файлы PDF и XLSX.')
+from django.core import validators
+from django.core.exceptions import ValidationError
+from django.db import models
+from easy_thumbnails.fields import ThumbnailerImageField
 
-class FileUpload(models.Model):
-    file = models.FileField(upload_to='uploads/', validators=[validate_file_extension])  # Добавляем валидатор
-    uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"File {self.file.name} uploaded at {self.uploaded_at}"
+# from precise_bbcode.fields import BBCodeTextField
 
 
 def get_timestamp_path(instance, filename):
-    # return '%s%s' % (datetime.now().timestamp(), splitext(filename)[1])
+    # return '%s%s' % (datetime.now().timestamp(),
+    #                  splitext(filename)[1])
     return f'{datetime.now().timestamp()}{splitext(filename)[1]}'
 
 def validate_even(val):
@@ -42,8 +33,10 @@ class MinMaxValueValidator:
                   code='out_of_range',
                   params={'min': self.min_value, 'max': self.max_value})
 
+
 class Img(models.Model):
-    img = models.ImageField(verbose_name='Изображение', upload_to=get_timestamp_path)
+    img = models.ImageField(verbose_name='Изображение',
+                            upload_to=get_timestamp_path)
     desc = models.TextField(verbose_name='Описание')
 
     class Meta:
@@ -190,9 +183,17 @@ class Bb(models.Model):
     # url = models.URLField()
     # slug = models.SlugField()
 
+    # archive = models.FileField(upload_to='archives/')
+    # archive = models.FileField(upload_to='archives/%Y/%m/%d/')
     # file = models.FileField(upload_to=get_timestamp_path)
 
+    img = models.ImageField(blank=True,
+                            upload_to=get_timestamp_path,
+                            verbose_name='Изображение')
 
+    # thumb = ThumbnailerImageField(
+    #     resize_source={'size': (400, 300), 'crop': 'scale'},
+    # )
 
     objects = models.Manager()
     by_price = BbManager()

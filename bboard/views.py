@@ -1,5 +1,6 @@
-from django.contrib.auth import get_user
+from django.contrib.auth import get_user, authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
@@ -21,8 +22,9 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 
-from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, FileUploadForm
-from bboard.models import Bb, Rubric
+
+from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
+from bboard.models import Bb, Rubric, Img
 
 
 # Основной (вернуть)
@@ -143,6 +145,17 @@ class BbCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 def add_and_save(request):
     if request.method == 'POST':
         bbf = BbForm(request.POST)
+
+        # bbf = BbForm(request.POST, request.FILES)
+
+        # bbf = BbForm(request.POST, request.FILES)
+        # if bbf.is_valid():
+        #     for file in request.FILES.getlist('img'):
+        #         img = Img()
+        #         img.desc = bbf.cleaned_data['desc']
+        #         img.img = file
+        #         img.save()
+
         if bbf.is_valid():
             bbf.save()
             # return HttpResponseRedirect(reverse('bboard:by_rubric',
@@ -352,29 +365,22 @@ def delete_img(request, pk):
     img.delete()
     return redirect('bboard:index')
 
-def file_upload_view(request):
-    if request.method == 'POST':
-        form = FileUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()  # Сохраняем файл
-            return redirect('file_upload_success')  # Перенаправление на страницу успеха
-    else:
-        form = FileUploadForm()
-    return render(request, 'file_upload.html', {'form': form})
-
 
 def my_login(request):
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    user = authenticate(request, username=username, password=password)
-
-    if user is not None:
-        login(request, user)
+    error_message = None
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('bboard:index')  # Успешный вход
+        else:
+            error_message = "Неверное имя пользователя или пароль."
     else:
-        return redirect('bboard:index', {'user':user})
+        form = AuthenticationForm()
+
+    return render(request, 'bboard/login.html', {'form': form, 'error_message': error_message})
 
 def my_logout(request):
     logout(request)
     return redirect('bboard:index')
-
-

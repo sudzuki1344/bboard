@@ -5,7 +5,11 @@
 
 {% block content %}
 <h2>Изменение объявления</h2>
-    <form method="post">
+    {% if form.is_multipart %}
+        <form method="post" enctype="multipart/form-data">
+    {% else %}
+        <form method="post">
+    {% endif %}
         {% csrf_token %}
 
         {% for hidden in form.hidden_fields %}

@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 
 from captcha.conf.settings import CAPTCHA_TIMEOUT, CAPTCHA_LENGTH
-from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES, MEDIA_URL
+from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES, MEDIA_URL, AUTH_USER_MODEL
+from django_bootstrap5.core import BOOTSTRAP5
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,10 +47,13 @@ INSTALLED_APPS = [
     'captcha',
     'precise_bbcode',
     'django_bootstrap5',
+    'easy_thumbnails',
 
     'bboard',  # 'bboard.apps.BboardConfig',
     'testapp',
     # 'todolist',
+
+    'django_cleanup',  # всегда в самом низу!!!
 ]
 
 MIDDLEWARE = [
@@ -114,16 +118,21 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        # 'OPTIONS': {'min_length': 10}
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
         'NAME': 'bboard.validators.NoForbiddenCharsValidator',
-        'OPTIONS': {'forbidden_chars':(' ', ',', '.', ':', ';')}
+        'OPTIONS': {'forbidden_chars': (' ', ',', '.', ':', ';')}
     },
 ]
 
+# AUTH_USER_MODEL = 'testapp.models.AdvUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -190,3 +199,43 @@ BOOTSTRAP5 = {
     'success_css_class': 'has-success',
     'error_css_class': 'has-error',
 }
+
+# easy-thumbnails
+THUMBNAIL_ALIASES = {
+    'bboard.Bb.img': {
+        'default': {
+            'size': (500, 300),
+            'crop': 'scale',
+        },
+    },
+    'testapp': {
+        'default': {
+            'size': (400, 300),
+            'crop': 'smart',
+            'bw': True,
+        },
+    },
+    '': {
+        'default': {
+            'size': (180, 240),
+            'crop': 'scale',
+        },
+        'big': {
+            'size': (480, 640),
+            'crop': '10,10',
+        },
+    },
+}
+
+THUMBNAIL_DEFAULT_OPTIONS = {
+    'quality': 90,
+    'subsampling': 1,
+}
+
+# THUMBNAIL_MEDIA_URL = '/media/thumbnail/'
+# THUMBNAIL_MEDIA_ROOT = BASE_DIR / 'media/thumbnail'
+THUMBNAIL_SUBDIR = 'thumbs'
+# THUMBNAIL_PREFIX = 'thumb_'
+# THUMBNAIL_EXTENSION = 'jpg'
+# THUMBNAIL_TRANSPARENCY_EXTENSION = 'png'
+THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)

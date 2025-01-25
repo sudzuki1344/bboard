@@ -1,12 +1,27 @@
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 
 
 class AdvUser(models.Model):
     is_activated = models.BooleanField(default=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+# class Profile(models.Model):
+#     # is_activated = models.BooleanField(default=True)
+#     phone = models.CharField(max_length=20)
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+
+# class AdvUser(AbstractUser):
+#     phone = models.CharField(max_length=20)
+
+
+# class AdvUser(User):
+#     phone = models.CharField(max_length=20)
+#
+#     class Meta:
+#         proxy = True
 
 
 class Spare(models.Model):

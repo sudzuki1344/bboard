@@ -7,11 +7,11 @@ register = template.Library()
 def currency(value, name='тг.'):
     return f'{value:.2f} {name}'
 
-register.filter('currency', currency)
+# register.filter('currency', currency)
+
 @register.simple_tag
 def lst(sep, *args):
-    return mark_safe(f'{sep.join(args)} (<strong>итого:</strong> {len(args)})')
-
+    return mark_safe(f'{sep.join(args)} (итого: <strong>{len(args)}</strong>)')
 
 @register.inclusion_tag('tags/ulist.html')
 def ulist(*args):

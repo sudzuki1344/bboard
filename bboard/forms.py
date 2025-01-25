@@ -7,37 +7,20 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric, Img, FileUpload
-
-
-from django import forms
-from .models import FileUpload
-
-class FileUploadForm(forms.ModelForm):
-    class Meta:
-        model = FileUpload
-        fields = ['file']
-
-    def clean_file(self):
-        file = self.cleaned_data.get('file')
-        valid_extensions = ['.pdf', '.xlsx']
-        import os
-        ext = os.path.splitext(file.name)[1].lower()
-        if ext not in valid_extensions:
-            raise forms.ValidationError('Разрешены только файлы PDF и XLSX.')
-        return file
-
-
+from bboard.models import Bb, Rubric, Img
 
 
 class ImgForm(ModelForm):
-    img = forms.ImageField(label='Изображение',
-                           validators=[validators.FileExtensionValidator(['jpg', 'jpeg', 'png'])],
-                           error_messages={
-                               'invalid_extension': 'Этот формат не поддерживается'
-                           })
+    img = forms.ImageField(
+        label='Изображение',
+        # widget=forms.widgets.ClearableFileInput(attrs={'multiple': True}),
+        validators=[validators.FileExtensionValidator(
+            allowed_extensions=('gif', 'jpg', 'png'))],
+        error_messages={
+            'invalid_extension': 'Этот формат не поддерживается'})
 
-    desc = forms.CharField(label='Описание', widget=forms.widgets.Textarea())
+    desc = forms.CharField(label='Описание',
+                           widget=forms.widgets.Textarea())
 
     class Meta:
         model = Img
@@ -52,11 +35,11 @@ class BbForm(ModelForm):
         error_messages={'invalid': 'Слишком короткое название товара'}
     )
 
-    captcha = CaptchaField(label='Введите текст с картинки',
-                           # generator='captcha.helpers.random_char_challenge',
-                           # generator='captcha.helpers.math_challenge',
-                           # generator='captcha.helpers.word_challenge',
-                           error_messages={'invalid': 'Неправильный текст'})
+    # captcha = CaptchaField(label='Введите текст с картинки',
+    #                        # generator='captcha.helpers.random_char_challenge',
+    #                        # generator='captcha.helpers.math_challenge',
+    #                        # generator='captcha.helpers.word_challenge',
+    #                        error_messages={'invalid': 'Неправильный текст'})
 
     def clean_title(self):
         val = self.cleaned_data['title']
@@ -79,7 +62,7 @@ class BbForm(ModelForm):
 
     class Meta:
         model = Bb
-        fields = ('title', 'content', 'price', 'rubric')
+        fields = ('title', 'content', 'price', 'rubric', 'img')
         help_texts = {'rubric': 'Не забудьте выбрать рубрику!'}
 
 

@@ -1,14 +1,12 @@
 from django.urls import path
 from django.views.generic.dates import WeekArchiveView, DayArchiveView
 from django.views.generic.edit import CreateView
-from django.conf import settings
-from django.conf.urls.static import static
 
 from bboard.models import Bb
 from bboard.views import (index, by_rubric, BbCreateView,
                           add_and_save, bb_detail, BbRubricBbsView,
                           BbDetailView, BbEditView, BbDeleteView, BbIndexView,
-                          BbRedirectView, edit, rubrics, bbs, search, file_upload_view)
+                          BbRedirectView, edit, rubrics, bbs, search, my_logout, my_login)
 
 app_name = 'bboard'
 
@@ -26,6 +24,9 @@ urlpatterns = [
     path('rubrics/', rubrics, name='rubrics'),
     path('bbs/<int:rubric_id>/', bbs, name='bbs'),
 
+    path('login/', my_login, name='login'),
+    path('logout/', my_logout, name='logout'),
+
     path('add/', BbCreateView.as_view(), name='add'),
     path('edit/<int:pk>/', BbEditView.as_view(), name='edit'),
     # path('edit/<int:pk>/', edit, name='edit'),
@@ -39,10 +40,5 @@ urlpatterns = [
     path('search/', search, name='search'),
 
     path('', index, name='index'),
-    path('upload/', file_upload_view, name='file_upload'),
     # path('', BbIndexView.as_view(), name='index'),
 ]
-
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
