@@ -84,6 +84,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 'bboard.middleware.rubrics',
+                'bboard.middleware.process_request',
             ],
         },
     },

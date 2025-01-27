@@ -1,7 +1,6 @@
 from bboard.models import Rubric
 from django.db.models import Count
 
-
 # def my_middleware(next):
 #     def core_middleware(request):
 #         response = next(request)
@@ -29,5 +28,12 @@ from django.db.models import Count
 
 
 def rubrics(request):
-    print('middleware')
     return {'rubrics': Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)}
+
+def process_request(request):
+    if request.user.is_authenticated:
+        user = request.user
+        groups = user.groups.values_list('name', flat=True)
+        return {'User Info': user, 'Groups': groups}
+    else:
+        return {'User Info': None}
