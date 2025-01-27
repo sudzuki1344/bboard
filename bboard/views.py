@@ -39,7 +39,7 @@ from bboard.models import Bb, Rubric, Img
 
 def index(request):
     bbs = Bb.objects.order_by('-published')
-    rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+    # rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
 
     paginator = Paginator(bbs, 2)
 
@@ -50,7 +50,7 @@ def index(request):
 
     page = paginator.get_page(page_num)
 
-    context = {'bbs': page.object_list, 'rubrics': rubrics, 'page': page}
+    context = {'bbs': page.object_list, 'page': page}
 
     return render(request, 'bboard/index.html', context)
 
