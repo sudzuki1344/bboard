@@ -3,6 +3,17 @@
 {% block title %}Поиск объявлений{% endblock %}
 
 {% block content %}
+
+    {% if messages %}
+        <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
     <h2>Поиск объявлений</h2>
     <form method="post">
         {% csrf_token %}

@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user, authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
 from django.db.models import Count
@@ -22,9 +22,9 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 
-
 from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
 from bboard.models import Bb, Rubric, Img
+from bboard.signals import add_bb
 
 
 # Основной (вернуть)
@@ -50,7 +50,28 @@ def index(request):
 
     page = paginator.get_page(page_num)
 
-    context = {'bbs': page.object_list, 'page': page}
+    # context = {'bbs': page.object_list, 'rubrics': rubrics, 'page': page}
+
+
+    # if 'counter' in request.COOKIES:
+    #     cnt = int(request.COOKIES['counter']) + 1
+    # else:
+    #     cnt = 1
+    #
+    # context = {'bbs': page.object_list, 'page': page, 'counter': cnt}
+    #
+    # response = render(request, 'bboard/index.html', context)
+    # response.set_cookie('counter', cnt)
+    # return response
+
+    if 'counter' in request.session:
+        cnt = request.session['counter'] + 1
+    else:
+        cnt = 1
+
+    request.session['counter'] = cnt
+
+    context = {'bbs': page.object_list, 'page': page, 'counter': cnt}
 
     return render(request, 'bboard/index.html', context)
 
@@ -78,12 +99,13 @@ def by_rubric(request, rubric_id):
     # bbs = Bb.objects.filter(rubric=rubric_id)
     bbs = get_list_or_404(Bb, rubric=rubric_id)
     # rubrics = Rubric.objects.all()
-    rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
+    # rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
     current_rubric = Rubric.objects.get(pk=rubric_id)
 
     # bbs = current_rubric.entries.all()
 
-    context = {'bbs': bbs, 'rubrics': rubrics, 'current_rubric': current_rubric}
+    # context = {'bbs': bbs, 'rubrics': rubrics, 'current_rubric': current_rubric}
+    context = {'bbs': bbs, 'current_rubric': current_rubric}
 
     return render(request, 'bboard/by_rubric.html', context)
 
@@ -98,8 +120,8 @@ class BbRubricBbsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.annotate(
-                                            cnt=Count('bb')).filter(cnt__gt=0)
+        # context['rubrics'] = Rubric.objects.annotate(
+        #                                     cnt=Count('bb')).filter(cnt__gt=0)
         context['current_rubric'] = Rubric.objects.get(
                                                    pk=self.kwargs['rubric_id'])
         return context
@@ -135,11 +157,16 @@ class BbCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
         return self.request.user.is_staff
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.annotate(
-                                            cnt=Count('bb')).filter(cnt__gt=0)
-        return context
+    def form_valid(self, form):
+        responce = super().form_valid(form)
+        add_bb.send(sender=self.__class__, instance=self.object)
+        return responce
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['rubrics'] = Rubric.objects.annotate(
+    #                                         cnt=Count('bb')).filter(cnt__gt=0)
+    #     return context
 
 
 def add_and_save(request):
@@ -177,12 +204,13 @@ class BbEditView(UpdateView):
     model = Bb
     form_class = BbForm
     success_url = reverse_lazy('bboard:index')
+    success_message = 'Объявление успешно исправлено!'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.annotate(
-                                            cnt=Count('bb')).filter(cnt__gt=0)
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['rubrics'] = Rubric.objects.annotate(
+    #                                         cnt=Count('bb')).filter(cnt__gt=0)
+    #     return context
 
 
 def edit(request, pk):
@@ -220,22 +248,22 @@ def bb_detail(request, bb_id):
 class BbDetailView(DetailView):
     model = Bb
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.annotate(
-                                            cnt=Count('bb')).filter(cnt__gt=0)
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['rubrics'] = Rubric.objects.annotate(
+    #                                         cnt=Count('bb')).filter(cnt__gt=0)
+    #     return context
 
 
 class BbDeleteView(DeleteView):
     model = Bb
     success_url = '/{rubric_id}/'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['rubrics'] = Rubric.objects.annotate(
-                                            cnt=Count('bb')).filter(cnt__gt=0)
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['rubrics'] = Rubric.objects.annotate(
+    #                                         cnt=Count('bb')).filter(cnt__gt=0)
+    #     return context
 
 
 @login_required(login_url='/login/')
@@ -350,6 +378,11 @@ def search(request):
             bbs = Bb.objects.filter(title__iregex=keyword,
                                     rubric=rubric_id)
 
+            messages.add_message(request, messages.SUCCESS,
+                                 'Слово найдено!', extra_tags='first second')
+
+            # messages.success(request, 'Слово найдено!')
+
             context = {'bbs': bbs, 'form': sf}
             return render(request, 'bboard/search_results.html', context)
     else:
@@ -367,19 +400,16 @@ def delete_img(request, pk):
 
 
 def my_login(request):
-    error_message = None
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('bboard:index')  # Успешный вход
-        else:
-            error_message = "Неверное имя пользователя или пароль."
-    else:
-        form = AuthenticationForm()
+    user_name = request.POST['username']
+    pass_word = request.POST['password']
+    user = authenticate(request, username=user_name, password=pass_word)
 
-    return render(request, 'bboard/login.html', {'form': form, 'error_message': error_message})
+    if user is not None:
+        login(request, user)
+        return render(request, 'bboard/login.html',
+                      {'user': user})
+
+    return redirect('bboard:index')
 
 def my_logout(request):
     logout(request)

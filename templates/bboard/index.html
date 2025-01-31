@@ -3,6 +3,17 @@
 {% load django_bootstrap5 %}
 
 {% block content %}
+    {% if messages %}
+        <ul class="messages messagelist">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <p>Counter: {{ counter }}</p>
 
     {#    {{ block.super }} #}
 

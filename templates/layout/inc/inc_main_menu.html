@@ -3,9 +3,9 @@
     <a href="{% url 'bboard:add' %}">Добавить</a>
     <a href="{% url 'bboard:rubrics' %}">Рубрики</a>
     {% if user.is_anonymous %}
-        <a href="{% url 'bboard:login' %}">Вход</a>
+        <a href="{% url 'login' %}">Вход</a>
     {% else %}
-        <form action="{% url 'bboard:logout' %}" method="post">
+        <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
             <input type="submit" value="Выход" class="btn btn-link btn-lg">
         </form>
@@ -16,4 +16,3 @@
             ({{ rubric.cnt }})</a>
     {% endfor %}
 </nav>
-

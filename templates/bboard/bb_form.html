@@ -4,6 +4,17 @@
 {% block title %}Изменение объявления{% endblock %}
 
 {% block content %}
+
+    {% if messages %}
+        <ul class="messages messagelist">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
 <h2>Изменение объявления</h2>
     {% if form.is_multipart %}
         <form method="post" enctype="multipart/form-data">
