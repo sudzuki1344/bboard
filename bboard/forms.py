@@ -7,7 +7,12 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric, Img
+from bboard.models import Bb, Rubric, Img, Profile
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar', 'bio', 'phone_number']
 
 
 class ImgForm(ModelForm):

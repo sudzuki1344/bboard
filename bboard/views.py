@@ -22,9 +22,10 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 
-from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
-from bboard.models import Bb, Rubric, Img
+from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, ProfileForm
+from bboard.models import Bb, Rubric, Img, Profile
 from bboard.signals import add_bb
+from django.contrib.auth.models import User
 
 
 # Основной (вернуть)
@@ -414,3 +415,9 @@ def my_login(request):
 def my_logout(request):
     logout(request)
     return redirect('bboard:index')
+
+@login_required
+def profile_view(request, username):
+    user = get_object_or_404(User, username=username)
+    profile = user.profile
+    return render(request, 'bboard/profile.html', {'profile': profile, 'user': user})
