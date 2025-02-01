@@ -26,6 +26,9 @@ from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, ProfileForm
 from bboard.models import Bb, Rubric, Img, Profile
 from bboard.signals import add_bb
 from django.contrib.auth.models import User
+from django.conf import settings
+import os
+from PIL import Image
 
 
 # Основной (вернуть)
@@ -421,3 +424,37 @@ def profile_view(request, username):
     user = get_object_or_404(User, username=username)
     profile = user.profile
     return render(request, 'bboard/profile.html', {'profile': profile, 'user': user})
+
+
+def upload_file(request):
+    if request.method == 'POST' and request.FILES.get('uploaded_file'):
+        uploaded_file = request.FILES['uploaded_file']
+        original_filename = uploaded_file.name
+        original_path = os.path.join(settings.MEDIA_ROOT, original_filename)
+
+        # Сохраняем файл низкоуровневым методом
+        with open(original_path, 'wb') as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+
+        # Проверяем, является ли файл изображением
+        try:
+            img = Image.open(original_path)
+            img.verify()  # Проверка, что файл является изображением
+        except Exception:
+            os.remove(original_path)  # Удаляем файл, если он не изображение
+            return render(request, 'bboard/upload.html', {'error': "Ошибка: Файл не является изображением!"})
+
+        # Создаём миниатюру
+        thumb_filename = "thumb_" + original_filename
+        thumb_path = os.path.join(settings.MEDIA_ROOT, thumb_filename)
+        img = Image.open(original_path)  # Открываем заново, так как .verify() разрушает поток
+        img.thumbnail((100, 100))
+        img.save(thumb_path, img.format if img.format else 'JPEG')
+
+        return render(request, 'bboard/upload_success.html', {
+            'file_url': os.path.join(settings.MEDIA_URL, original_filename),
+            'thumb_url': os.path.join(settings.MEDIA_URL, thumb_filename),
+        })
+
+    return render(request, 'bboard/upload.html')
