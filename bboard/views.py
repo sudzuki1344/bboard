@@ -22,7 +22,7 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 
-from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, ProfileForm
+from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, ProfileForm, BbCustomForm
 from bboard.models import Bb, Rubric, Img, Profile
 from bboard.signals import add_bb
 from django.contrib.auth.models import User
@@ -458,3 +458,22 @@ def upload_file(request):
         })
 
     return render(request, 'bboard/upload.html')
+
+def add_announcement(request):
+    if request.method == 'POST':
+        form = BbCustomForm(request.POST, request.FILES)
+        if form.is_valid():
+            cd = form.cleaned_data
+            # Создаём объект модели Bb на основе данных формы
+            Bb.objects.create(
+                kind=cd['kind'],
+                rubric=cd['rubric'],
+                title=cd['title'],
+                content=cd['content'],
+                price=cd.get('price') or 0,
+                # Если необходимо, можно добавить обработку изображения из request.FILES
+            )
+            return redirect('bboard:index')  # Замените 'success_url' на нужный URL или имя маршрута
+    else:
+        form = BbCustomForm()
+    return render(request, 'bboard/bb_custom_form.html', {'form': form})
