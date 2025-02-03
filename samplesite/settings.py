@@ -266,3 +266,26 @@ THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
 # MESSAGE_TAGS = {
 #     CRITICAL: 'critical'
 # }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_HOST = 'localhost'  # SMTP сервер (Gmail, Яндекс)
+# EMAIL_PORT = 25  # Порт для TLS
+# EMAIL_USE_TLS = True  # Использовать TLS (шифрование)
+# EMAIL_HOST_USER = 'your_email@gmail.com'  # Ваш email
+# EMAIL_HOST_PASSWORD = 'your_app_password'  # Пароль приложения (для Gmail)
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# EMAIL_USE_LOCALTIME = True
+# EMAIL_FILE_PATH = BASE_DIR / 'email'
+
+# ADMINS = [
+#     ('admin', 'admin@supersite.kz'),
+#     ('admin', 'admin2@supersite.kz'),
+#     ('admin', 'admin3@supersite.kz'),
+# ]
+#
+# MANAGERS = [
+#     ('manager', 'manager@supersite.kz'),
+#     ('manager2', 'manager2@supersite.kz'),
+#     ('manager3', 'manager3@supersite.kz'),
+# ]
