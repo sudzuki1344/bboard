@@ -2,6 +2,7 @@ from django.contrib.auth import get_user, authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
 from django.db.models import Count
@@ -477,3 +478,21 @@ def add_announcement(request):
     else:
         form = BbCustomForm()
     return render(request, 'bboard/bb_custom_form.html', {'form': form})
+
+def send_email_view(request):
+    if request.method == 'POST':
+        recipient = request.POST.get('email', 'andrewmalik@yandex.com')  # Email получателя
+        try:
+            # Отправка письма
+            send_mail(
+                'Восстановление пароля',  # Тема письма
+                'Это письмо для восстановления пароля.',  # Текст письма
+                'andrewmalik@yandex.com',  # Отправитель (ваш Яндекс email)
+                [recipient],  # Получатель (email, введенный в форму)
+                fail_silently=False,
+            )
+            return HttpResponse("Email отправлено успешно!")
+        except Exception as e:
+            return HttpResponse(f"Ошибка при отправке email: {e}", status=500)
+
+    return render(request, 'bboard/send_email.html')

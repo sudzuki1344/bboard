@@ -268,15 +268,15 @@ THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
 # }
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST = 'localhost'  # SMTP сервер (Gmail, Яндекс)
-# EMAIL_PORT = 25  # Порт для TLS
-# EMAIL_USE_TLS = True  # Использовать TLS (шифрование)
-# EMAIL_HOST_USER = 'your_email@gmail.com'  # Ваш email
-# EMAIL_HOST_PASSWORD = 'your_app_password'  # Пароль приложения (для Gmail)
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-# EMAIL_USE_LOCALTIME = True
-# EMAIL_FILE_PATH = BASE_DIR / 'email'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'andrewmalik@yandex.com'  # Ваш Яндекс-почтовый адрес
+EMAIL_HOST_PASSWORD = 'qykvyyfcpjtbsdyb'  # Ваш пароль приложения (НЕ обычный пароль)
+
+
+
 
 # ADMINS = [
 #     ('admin', 'admin@supersite.kz'),

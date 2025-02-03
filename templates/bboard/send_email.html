@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Отправка Email</title>
+</head>
+<body>
+    <h1>Отправить письмо для восстановления пароля</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="email">Введите ваш email:</label>
+        <input type="email" name="email" required>
+        <button type="submit">Отправить</button>
+    </form>
+</body>
+</html>
