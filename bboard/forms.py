@@ -7,12 +7,7 @@ from django.forms import ModelForm, modelform_factory, Select, modelformset_fact
 from django.forms.fields import DecimalField
 from django.forms.models import BaseModelFormSet
 
-from bboard.models import Bb, Rubric, Img, Profile
-
-class ProfileForm(forms.ModelForm):
-    class Meta:
-        model = Profile
-        fields = ['avatar', 'bio', 'phone_number']
+from bboard.models import Bb, Rubric, Img
 
 
 class ImgForm(ModelForm):
@@ -40,11 +35,11 @@ class BbForm(ModelForm):
         error_messages={'invalid': 'Слишком короткое название товара'}
     )
 
-    captcha = CaptchaField(label='Введите текст с картинки',
-                           # generator='captcha.helpers.random_char_challenge',
-                           # generator='captcha.helpers.math_challenge',
-                           # generator='captcha.helpers.word_challenge',
-                           error_messages={'invalid': 'Неправильный текст'})
+    # captcha = CaptchaField(label='Введите текст с картинки',
+    #                        # generator='captcha.helpers.random_char_challenge',
+    #                        # generator='captcha.helpers.math_challenge',
+    #                        # generator='captcha.helpers.word_challenge',
+    #                        error_messages={'invalid': 'Неправильный текст'})
 
     def clean_title(self):
         val = self.cleaned_data['title']
@@ -152,46 +147,3 @@ class SearchForm(forms.Form):
     keyword = forms.CharField(max_length=20, label='Искомое слово')
     rubric = forms.ModelChoiceField(queryset=Rubric.objects.all(),
                                     label='Рубрика')
-
-
-class BbCustomForm(forms.Form):
-    # Пример поля выбора типа объявления
-    KIND_CHOICES = (
-        ('b', 'Куплю'),
-        ('s', 'Продам'),
-        ('c', 'Обменяю'),
-    )
-    kind = forms.ChoiceField(
-        choices=KIND_CHOICES,
-        label='Тип объявления'
-    )
-
-    # Если вам требуется выбор рубрики из уже существующих
-    rubric = forms.ModelChoiceField(
-        queryset=Rubric.objects.all(),
-        label='Рубрика'
-    )
-
-    title = forms.CharField(
-        label='Название товара',
-        max_length=50,
-        widget=forms.TextInput(attrs={'placeholder': 'Введите название товара'})
-    )
-
-    content = forms.CharField(
-        label='Описание',
-        widget=forms.Textarea(attrs={'placeholder': 'Введите описание товара'})
-    )
-
-    price = forms.DecimalField(
-        label='Цена',
-        max_digits=15,
-        decimal_places=2,
-        required=False
-    )
-
-    # Добавляем капчу
-    captcha = CaptchaField(
-        label='Введите текст с картинки',
-        error_messages={'invalid': 'Неправильный текст'}
-    )

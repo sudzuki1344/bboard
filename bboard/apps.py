@@ -6,6 +6,5 @@ class BboardConfig(AppConfig):
     name = 'bboard'
     verbose_name = 'Объявления'
 
-
     def ready(self):
         import bboard.signals

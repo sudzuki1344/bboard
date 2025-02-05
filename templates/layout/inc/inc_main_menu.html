@@ -1,3 +1,8 @@
+{% load cache %}
+
+{#{% cache 300 navbar %}#}
+{#{% cache 30 navbar request.user.is_authenticated %}#}
+{% cache 30 navbar request.user.is_authenticated request.user.username %}
 <nav>
     <a href="{% url 'bboard:index' %}">Главная</a>
     <a href="{% url 'bboard:add' %}">Добавить</a>
@@ -16,3 +21,4 @@
             ({{ rubric.cnt }})</a>
     {% endfor %}
 </nav>
+{% endcache %}

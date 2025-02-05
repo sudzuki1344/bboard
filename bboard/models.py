@@ -4,7 +4,6 @@ from os.path import splitext
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.contrib.auth.models import User
 from easy_thumbnails.fields import ThumbnailerImageField
 
 
@@ -33,16 +32,6 @@ class MinMaxValueValidator:
                   'находиться в диапазоне от %(min)s до %(max)s',
                   code='out_of_range',
                   params={'min': self.min_value, 'max': self.max_value})
-
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-    bio = models.TextField(blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f'Профиль {self.user.username}'
 
 
 class Img(models.Model):

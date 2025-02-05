@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 
 from captcha.conf.settings import CAPTCHA_TIMEOUT, CAPTCHA_LENGTH
-from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES, MEDIA_URL, AUTH_USER_MODEL
+from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES, MEDIA_URL, AUTH_USER_MODEL, \
+    EMAIL_BACKEND, DEFAULT_FROM_EMAIL, EMAIL_HOST, CACHE_MIDDLEWARE_ALIAS, CACHE_MIDDLEWARE_SECONDS
 from django.contrib import messages
 from django_bootstrap5.core import BOOTSTRAP5
 
@@ -59,8 +60,12 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+
+    # 'django.middleware.cache.UpdateCacheMiddleware',  # для кэша
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware',  # для кэша
+
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -267,21 +272,33 @@ THUMBNAIL_PRESERVE_EXTENSIONS = ('png',)
 #     CRITICAL: 'critical'
 # }
 
+#######################
+######## Email ########
+#######################
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yandex.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'andrewmalik@yandex.com'  # Ваш Яндекс-почтовый адрес
-EMAIL_HOST_PASSWORD = 'qykvyyfcpjtbsdyb'  # Ваш пароль приложения (НЕ обычный пароль)
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 
+### 'django.core.mail.backends.smtp.EmailBackend' ###
+# EMAIL_HOST = 'localhost'
+# EMAIL_PORT = 25
+# EMAIL_HOST_USER = ""
+# EMAIL_HOST_PASSWORD = ""
 
+EMAIL_USE_LOCALTIME = True
+
+### 'django.core.mail.backends.filebased.EmailBackend' ###
+# EMAIL_FILE_PATH = BASE_DIR / 'email'
 
 # ADMINS = [
 #     ('admin', 'admin@supersite.kz'),
-#     ('admin', 'admin2@supersite.kz'),
-#     ('admin', 'admin3@supersite.kz'),
+#     ('admin2', 'admin2@supersite.kz'),
+#     ('admin3', 'admin3@supersite.kz'),
 # ]
 #
 # MANAGERS = [
@@ -289,3 +306,38 @@ EMAIL_HOST_PASSWORD = 'qykvyyfcpjtbsdyb'  # Ваш пароль приложен
 #     ('manager2', 'manager2@supersite.kz'),
 #     ('manager3', 'manager3@supersite.kz'),
 # ]
+
+
+#######################
+#######  Cache  #######
+#######################
+
+CACHES = {
+    # 'default': {
+    #     # 'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+    #     # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     # 'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+    #     # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    #     'LOCATION': 'cache1',
+    # },
+    # 'special': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     'LOCATION': 'cache2',
+    # },
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+        'TIMEOUT': 120,  # по умолчанию 300 сек.
+        'OPITIONS': {
+            'MAX_ENTRIES': 200,
+        }
+    },
+    'redis': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://localhost:6379/0',
+    },
+}
+
+# CACHE_MIDDLEWARE_ALIAS = "default"
+# CACHE_MIDDLEWARE_SECONDS = 10

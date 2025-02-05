@@ -7,8 +7,11 @@
 
 {% block content %}
     <div>
+        {% if bb.rubric %}
         <p>Рубрика: <a href="{% url 'bboard:by_rubric' bb.rubric.pk %}">
                                                 {{ bb.rubric.name }}</a></p>
+        {% endif %}
+
         <h2>{{ bb.title }}</h2>
 
         {% if bb.img %}

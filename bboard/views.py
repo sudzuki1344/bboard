@@ -2,7 +2,6 @@ from django.contrib.auth import get_user, authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
 from django.db.models import Count
@@ -14,8 +13,10 @@ from django.shortcuts import render, redirect, get_object_or_404, get_list_or_40
 from django.template import loader
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy, reverse
+from django.views.decorators.cache import cache_page
 from django.views.decorators.http import (require_http_methods,
                                           require_GET, require_POST, require_safe)
+from django.views.decorators.vary import vary_on_headers, vary_on_cookie
 from django.views.generic.base import RedirectView
 from django.views.generic.dates import ArchiveIndexView
 from django.views.generic.list import ListView
@@ -23,13 +24,9 @@ from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
 
-from bboard.forms import BbForm, RubricBaseFormSet, SearchForm, ProfileForm, BbCustomForm
-from bboard.models import Bb, Rubric, Img, Profile
+from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
+from bboard.models import Bb, Rubric, Img
 from bboard.signals import add_bb
-from django.contrib.auth.models import User
-from django.conf import settings
-import os
-from PIL import Image
 
 
 # Основной (вернуть)
@@ -42,6 +39,12 @@ from PIL import Image
 #     return render(request, 'bboard/index.html', context)
 
 
+# @cache_page(60 * 5)
+# @cache_page(30)
+# @vary_on_headers('User-Agent')
+# @vary_on_headers('Cookie')
+# @vary_on_headers('User-Agent', 'Cookie')
+# @vary_on_cookie
 def index(request):
     bbs = Bb.objects.order_by('-published')
     # rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
@@ -163,9 +166,9 @@ class BbCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return self.request.user.is_staff
 
     def form_valid(self, form):
-        responce = super().form_valid(form)
+        response = super().form_valid(form)
         add_bb.send(sender=self.__class__, instance=self.object)
-        return responce
+        return response
 
     # def get_context_data(self, **kwargs):
     #     context = super().get_context_data(**kwargs)
@@ -419,80 +422,3 @@ def my_login(request):
 def my_logout(request):
     logout(request)
     return redirect('bboard:index')
-
-@login_required
-def profile_view(request, username):
-    user = get_object_or_404(User, username=username)
-    profile = user.profile
-    return render(request, 'bboard/profile.html', {'profile': profile, 'user': user})
-
-
-def upload_file(request):
-    if request.method == 'POST' and request.FILES.get('uploaded_file'):
-        uploaded_file = request.FILES['uploaded_file']
-        original_filename = uploaded_file.name
-        original_path = os.path.join(settings.MEDIA_ROOT, original_filename)
-
-        # Сохраняем файл низкоуровневым методом
-        with open(original_path, 'wb') as f:
-            for chunk in uploaded_file.chunks():
-                f.write(chunk)
-
-        # Проверяем, является ли файл изображением
-        try:
-            img = Image.open(original_path)
-            img.verify()  # Проверка, что файл является изображением
-        except Exception:
-            os.remove(original_path)  # Удаляем файл, если он не изображение
-            return render(request, 'bboard/upload.html', {'error': "Ошибка: Файл не является изображением!"})
-
-        # Создаём миниатюру
-        thumb_filename = "thumb_" + original_filename
-        thumb_path = os.path.join(settings.MEDIA_ROOT, thumb_filename)
-        img = Image.open(original_path)  # Открываем заново, так как .verify() разрушает поток
-        img.thumbnail((100, 100))
-        img.save(thumb_path, img.format if img.format else 'JPEG')
-
-        return render(request, 'bboard/upload_success.html', {
-            'file_url': os.path.join(settings.MEDIA_URL, original_filename),
-            'thumb_url': os.path.join(settings.MEDIA_URL, thumb_filename),
-        })
-
-    return render(request, 'bboard/upload.html')
-
-def add_announcement(request):
-    if request.method == 'POST':
-        form = BbCustomForm(request.POST, request.FILES)
-        if form.is_valid():
-            cd = form.cleaned_data
-            # Создаём объект модели Bb на основе данных формы
-            Bb.objects.create(
-                kind=cd['kind'],
-                rubric=cd['rubric'],
-                title=cd['title'],
-                content=cd['content'],
-                price=cd.get('price') or 0,
-                # Если необходимо, можно добавить обработку изображения из request.FILES
-            )
-            return redirect('bboard:index')  # Замените 'success_url' на нужный URL или имя маршрута
-    else:
-        form = BbCustomForm()
-    return render(request, 'bboard/bb_custom_form.html', {'form': form})
-
-def send_email_view(request):
-    if request.method == 'POST':
-        recipient = request.POST.get('email', 'andrewmalik@yandex.com')  # Email получателя
-        try:
-            # Отправка письма
-            send_mail(
-                'Восстановление пароля',  # Тема письма
-                'Это письмо для восстановления пароля.',  # Текст письма
-                'andrewmalik@yandex.com',  # Отправитель (ваш Яндекс email)
-                [recipient],  # Получатель (email, введенный в форму)
-                fail_silently=False,
-            )
-            return HttpResponse("Email отправлено успешно!")
-        except Exception as e:
-            return HttpResponse(f"Ошибка при отправке email: {e}", status=500)
-
-    return render(request, 'bboard/send_email.html')
