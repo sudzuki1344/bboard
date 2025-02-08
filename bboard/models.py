@@ -5,6 +5,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.db import models
 from easy_thumbnails.fields import ThumbnailerImageField
+from .validators import validate_non_negative
 
 
 # from precise_bbcode.fields import BBCodeTextField
@@ -82,6 +83,14 @@ class Rubric(models.Model):
 
     # objects = RubricQuerySet.as_manager()
     objects = models.Manager.from_queryset(RubricQuerySet)()
+
+    def get_info(self):
+        """Возвращает id и название рубрики"""
+        return f'#{self.id}: {self.name}'
+
+    def get_total_price(self):
+        """Возвращает сумму цен всех объявлений в рубрике"""
+        return sum(bb.price or 0 for bb in self.bb_set.all())
 
     def __str__(self):
         return f'{self.name}'
@@ -169,7 +178,7 @@ class Bb(models.Model):
         blank=True,
         default=0,
         verbose_name='Цена',
-        # validators=[validate_even]
+        validators=[validate_non_negative]
     )
 
     published = models.DateTimeField(
@@ -205,14 +214,23 @@ class Bb(models.Model):
 
     title_and_price.short_description = 'Название и цена'
 
+    def get_full_info(self):
+        """Возвращает id и полную информацию об объявлении"""
+        return f'#{self.id}: {self.title} ({self.get_kind_display()})'
+
+    def get_total_with_tax(self, tax_rate=0.2):
+        """Возвращает цену с учетом налога"""
+        if self.price:
+            return float(self.price) * (1 + tax_rate)
+        return 0
+
     def clean(self):
         errors = {}
         if not self.content:
             errors['content'] = ValidationError('Укажите описание товара')
 
         if self.price and self.price < 0:
-            errors['price'] = ValidationError('Укажите неоьрицательное'
-                                              'значение цены')
+            errors['price'] = ValidationError('Укажите неотрицательное значение цены')
         if errors:
             raise ValidationError(errors)
 
