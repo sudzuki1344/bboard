@@ -51,8 +51,9 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'easy_thumbnails',
 
-    'bboard',  # 'bboard.apps.BboardConfig',
-    'testapp',
+    'bboard.apps.BboardConfig',
+    'testapp.apps.TestappConfig',
+    'icecream.apps.IcecreamConfig',
     # 'todolist',
 
     'django_cleanup',  # всегда в самом низу!!!
