@@ -46,6 +46,8 @@ from bboard.signals import add_bb
 # @vary_on_headers('Cookie')
 # @vary_on_headers('User-Agent', 'Cookie')
 # @vary_on_cookie
+
+@cache_page(30)
 def index(request):
     bbs = Bb.objects.order_by('-published')
     # rubrics = Rubric.objects.annotate(cnt=Count('bb')).filter(cnt__gt=0)
