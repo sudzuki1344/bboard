@@ -51,9 +51,8 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'easy_thumbnails',
 
-    'bboard.apps.BboardConfig',
-    'testapp.apps.TestappConfig',
-    'icecream.apps.IcecreamConfig',
+    'bboard',  # 'bboard.apps.BboardConfig',
+    'testapp',
     # 'todolist',
 
     'django_cleanup',  # всегда в самом низу!!!
@@ -313,12 +312,32 @@ EMAIL_USE_LOCALTIME = True
 #######  Cache  #######
 #######################
 
-# bboard/settings.py
-
 CACHES = {
+    # 'default': {
+    #     # 'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+    #     # 'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     # 'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+    #     # 'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    #     'LOCATION': 'cache1',
+    # },
+    # 'special': {
+    #     'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    #     'LOCATION': 'cache2',
+    # },
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+        'TIMEOUT': 120,  # по умолчанию 300 сек.
+        'OPITIONS': {
+            'MAX_ENTRIES': 200,
+        }
+    },
+    'redis': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://localhost:6379/0',
+    },
 }
 
+# CACHE_MIDDLEWARE_ALIAS = "default"
+# CACHE_MIDDLEWARE_SECONDS = 10
