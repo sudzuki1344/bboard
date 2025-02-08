@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test, per
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.core.signing import Signer
 from django.db import transaction, DatabaseError
 from django.db.models import Count
 from django.forms import modelformset_factory
@@ -422,3 +423,18 @@ def my_login(request):
 def my_logout(request):
     logout(request)
     return redirect('bboard:index')
+
+
+def flash_and_sign_view(request):
+    # Добавляем всплывающее уведомление
+    messages.success(request, "Операция выполнена успешно!")
+
+    # Подписываем данные
+    signer = Signer()
+    original_data = "Данные для подписи"
+    signed_data = signer.sign(original_data)
+
+    context = {
+        'signed_data': signed_data,
+    }
+    return render(request, 'bboard/flash_sign.html', context)
