@@ -100,3 +100,8 @@ def test_mail(request):
     #               html_message='<strong>Редакторы, не спите!</strong>')
 
     return render(request, 'testapp/test_email.html')
+
+def hide_comment(request):
+    if request.user.has_perm('testapp.hide_comments'):
+        pass
+    

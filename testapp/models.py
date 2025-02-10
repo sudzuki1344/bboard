@@ -86,3 +86,17 @@ class PrivateMessage(Message):
 #
 #     # class Meta:
 #         # ordering = ['order', 'name']
+
+
+class Comment(models.Model):
+    content = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def hide_comment(self):
+        self.content = 'Скрытый комментарий'
+        self.save()
+
+    class Meta:
+        permissions = (
+            ('hide_comments', 'Можно скрывать комментарии'),
+        )
