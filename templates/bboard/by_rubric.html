@@ -1,0 +1,19 @@
+{% extends "layout/basic.html" %}
+
+
+{% block title %}{{ current_rubric }}{% endblock %}
+
+{% block content %}
+    {% for bb in bbs %}
+    {% url 'bboard:detail' bb.pk as detail_url %}
+    <div>
+        <h2>
+{#            <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title }}</a>#}
+{#            <a href="{% url 'bboard:detail' pk=bb.pk %}">{{ bb.title }}</a>#}
+        <a href="{{ detail_url }}">{{ bb.title }}</a>
+        </h2>
+        <p>{{ bb.content }}</p>
+        <p>{{ bb.published|date:"d.m.Y H:i:s" }}</p>
+    </div>
+    {% endfor %}
+{% endblock %}

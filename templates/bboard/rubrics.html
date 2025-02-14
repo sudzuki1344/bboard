@@ -1,0 +1,18 @@
+{% extends "layout/basic.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}Правка рубрик{% endblock %}
+
+{% block content %}
+<h2>Правка рубрик</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% bootstrap_formset formset %}
+        {% bootstrap_button 'Сохранить' %}
+        {% bootstrap_button 'Очистить' button_type='reset' button_class='btn-secondary' %}
+
+    </form>
+
+{% endblock %}

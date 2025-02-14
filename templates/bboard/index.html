@@ -1,0 +1,47 @@
+{% extends "layout/basic.html" %}
+{% load bbcode_tags %}
+{% load django_bootstrap5 %}
+
+{% block content %}
+    {% if messages %}
+        <ul class="messages messagelist">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {{ message }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <p>Counter: {{ counter }}</p>
+
+    {#    {{ block.super }} #}
+
+    {% with bb_count=bbs.count %}
+        {% if bb_count > 0 %}
+            <p>Всего {{ bb_count }} объявлений.</p>
+        {% endif %}
+    {% endwith %}
+
+    {% for bb in bbs %}
+        <div>
+            <h2>
+                <a href="{% url 'bboard:detail' bb.pk %}">{{ bb.title_and_price }}</a>
+            </h2>
+
+{#            <p>{{ bb.content }}</p>#}
+            <p>{% bbcode bb.content %}</p>
+
+            {% if bb.rubric %}
+            <p><a href="{% url 'bboard:by_rubric' bb.rubric.pk %}">
+                {{ bb.rubric.name }}</a></p>
+            {% endif %}
+
+
+            <p>{{ bb.published|date:"d.m.Y H:i:s" }}</p>
+        </div>
+    {% endfor %}
+
+    {% bootstrap_pagination page size='sm' pages_to_show=5 %}
+
+{% endblock %}
