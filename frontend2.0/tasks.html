@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список Задач и Пользователей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <h1>Список Задач</h1>
+        <div id="task-list">Загрузка задач...</div>
+    </section>
+    
+    <section>
+        <h2>Добавить задачу</h2>
+        <form id="task-form" method="post">
+            <p>
+                Заголовок: <input type="text" name="title" id="title" required>
+            </p>
+            <p>
+                Описание: <textarea name="description" id="description"></textarea>
+            </p>
+            <p>
+                Выполнено: <input type="checkbox" name="completed" id="completed">
+            </p>
+            <p>
+                <input type="submit" value="Добавить задачу">
+            </p>
+        </form>
+    </section>
+
+    <section>
+        <h1>Список Пользователей</h1>
+        <div id="user-list">Загрузка пользователей...</div>
+    </section>
+    
+    <script src="tasks.js"></script>
+</body>
+</html> 

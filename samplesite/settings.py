@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'bboard',  # 'bboard.apps.BboardConfig',
     'testapp',
     # 'todolist',
+    'tasks',  # Добавлено приложение tasks для работы с REST API задач и пользователей
 
     'django_cleanup',  # всегда в самом низу!!!
 ]
