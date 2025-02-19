@@ -30,7 +30,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
 from bboard.models import Bb, Rubric, Img
-from bboard.serializers import RubricSerializer
+from bboard.serializers import RubricSerializer, BbSerializer
 from bboard.signals import add_bb
 from rest_framework.views import APIView
 from rest_framework import generics
@@ -504,3 +504,72 @@ class APIRubricList(generics.ListAPIView):
 class APIRubricViewSet(ModelViewSet):
     queryset = Rubric.objects.all()
     serializer_class = RubricSerializer
+    
+    def get_queryset(self):
+        queryset = Rubric.objects.all()
+        name = self.request.query_params.get('name', None)
+        if name is not None:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response_data = {
+                'count': self.paginator.page.paginator.count,
+                'results': serializer.data,
+                'metadata': {
+                    'total_rubrics': Rubric.objects.count(),
+                    'has_bbs': queryset.filter(bb__isnull=False).exists()
+                }
+            }
+            return self.get_paginated_response(response_data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        response_data = {
+            'data': serializer.data,
+            'message': 'Rubric created successfully',
+            'status': 'success'
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        response_data = {
+            'data': serializer.data,
+            'message': 'Rubric updated successfully',
+            'status': 'success',
+            'related_bbs_count': instance.bb_set.count()
+        }
+        return Response(response_data)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        bbs_count = instance.bb_set.count()
+        if bbs_count > 0:
+            return Response({
+                'message': f'Cannot delete rubric with {bbs_count} associated bulletin boards',
+                'status': 'error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
+        return Response({
+            'message': 'Rubric deleted successfully',
+            'status': 'success'
+        }, status=status.HTTP_204_NO_CONTENT)
+
+class ApiBbViewSet(ModelViewSet):
+    queryset = Bb.objects.all()
+    serializer_class = BbSerializer

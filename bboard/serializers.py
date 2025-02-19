@@ -8,3 +8,10 @@ class RubricSerializer(serializers.ModelSerializer):
         model = Rubric
         # fields = '__all__'
         fields = ('id', 'name')
+
+
+class BbSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bb
+        fields = ('id', 'title', 'content', 'price', 'published', 'rubric')
+        read_only_fields = ('published',)

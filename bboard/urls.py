@@ -8,12 +8,14 @@ from bboard.models import Bb
 from bboard.views import (APIRubricDetail, APIRubrics, index, by_rubric, BbCreateView,
                           add_and_save, bb_detail, BbRubricBbsView,
                           BbDetailView, BbEditView, BbDeleteView, BbIndexView,
-                          BbRedirectView, edit, rubrics, bbs, search, api_rubrics, api_rubric_detail, APIRubricViewSet)
+                          BbRedirectView, edit, rubrics, bbs, search, api_rubrics, api_rubric_detail, 
+                          APIRubricViewSet, ApiBbViewSet)
 
 app_name = 'bboard'
 
 router = DefaultRouter()
 router.register('rubrics', APIRubricViewSet)
+router.register('bbs', ApiBbViewSet)
 
 urlpatterns = [
     # path('api/rubrics/<int:pk>/', api_rubric_detail),
