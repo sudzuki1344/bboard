@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import re
 
 from captcha.conf.settings import CAPTCHA_TIMEOUT, CAPTCHA_LENGTH
 from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES, MEDIA_URL, AUTH_USER_MODEL, \
@@ -57,7 +56,6 @@ INSTALLED_APPS = [
     'bboard',  # 'bboard.apps.BboardConfig',
     'testapp',
     # 'todolist',
-    'tasks',  # Добавлено приложение tasks для работы с REST API задач и пользователей
 
     'django_cleanup',  # всегда в самом низу!!!
 ]
@@ -67,6 +65,7 @@ MIDDLEWARE = [
 
     # 'django.middleware.cache.UpdateCacheMiddleware',  # для кэша
     'django.contrib.sessions.middleware.SessionMiddleware',
+
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',  # для кэша
@@ -347,26 +346,18 @@ CACHES = {
 # CACHE_MIDDLEWARE_ALIAS = "default"
 # CACHE_MIDDLEWARE_SECONDS = 10
 
-
+############
+### Cors ###
+############
 
 CORS_ALLOW_ALL_ORIGINS = True
-
 # CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
+#     'http://www.bboard.kz',
+#     'https://www.bboard.kz',
+#     'https://admin.bboard.kz',
 # ]
-# CORS_ALLOWED_ORIGINS_REGEX = [
-#     r"^https://.*\.example\.com$",
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r'^https?://(www|admin)\.bboard\.kz$',
 # ]
-# CORS_ALLOW_METHODS = [
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-# ]
-
-CORS_URLS_REGEX = re.compile(r'^/api/.*$')
-
-
-# CORS_ALLOW_CREDENTIALS = True
-
+# CORS_ALLOW_METHODS = ['GET', 'POST']
+CORS_URLS_REGEX = r'^/api/.*$'

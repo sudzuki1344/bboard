@@ -45,8 +45,6 @@ urlpatterns = [
     path('todo/', include('todolist.urls', namespace='todo')),
 
     path('', include('bboard.urls', namespace='bboard')),
-
-    path('api/', include('tasks.urls')),
 ]
 
 urlpatterns += [
