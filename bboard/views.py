@@ -27,6 +27,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from bboard.permissions import IsAuthenticatedForAPI, AllowAnyForLogin
 
 from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
 from bboard.models import Bb, Rubric, Img
@@ -435,7 +436,7 @@ def my_logout(request):
 ### DRF ###
 ###########
 @api_view(['GET', 'POST'])
-# @permission_classes((IsAuthenticated,))
+@permission_classes([IsAuthenticatedForAPI])
 def api_rubrics(request):
     if request.method == 'GET':
         rubrics = Rubric.objects.all()
@@ -443,13 +444,10 @@ def api_rubrics(request):
         return Response(serializer.data)
     elif request.method == 'POST':
         serializer = RubricSerializer(data=request.data)
-
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
@@ -505,7 +503,7 @@ class APIRubricList(generics.ListAPIView):
 class APIRubricViewSet(ModelViewSet):
     queryset = Rubric.objects.all()
     serializer_class = RubricSerializer
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticatedForAPI]  # Enforces authentication for all APIRubric endpoints
     
     def get_queryset(self):
         queryset = Rubric.objects.all()
@@ -575,3 +573,4 @@ class APIRubricViewSet(ModelViewSet):
 class ApiBbViewSet(ModelViewSet):
     queryset = Bb.objects.all()
     serializer_class = BbSerializer
+    permission_classes = [IsAuthenticatedForAPI]  # Enforces authentication for all ApiBb endpoints
