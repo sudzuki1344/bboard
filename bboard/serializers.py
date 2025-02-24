@@ -1,6 +1,7 @@
 from rest_framework import serializers
-
 from .models import Rubric, Bb
+from django.contrib.auth.models import User
+
 
 
 class RubricSerializer(serializers.ModelSerializer):
@@ -15,3 +16,11 @@ class BbSerializer(serializers.ModelSerializer):
         model = Bb
         fields = ('id', 'title', 'content', 'price', 'published', 'rubric')
         read_only_fields = ('published',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    

@@ -31,11 +31,12 @@ from bboard.permissions import IsAuthenticatedForAPI, AllowAnyForLogin
 
 from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
 from bboard.models import Bb, Rubric, Img
-from bboard.serializers import RubricSerializer, BbSerializer
+from bboard.serializers import RubricSerializer, BbSerializer, UserSerializer
 from bboard.signals import add_bb
 from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
+
 
 # Основной (вернуть)
 # def index(request):
@@ -574,3 +575,14 @@ class ApiBbViewSet(ModelViewSet):
     queryset = Bb.objects.all()
     serializer_class = BbSerializer
     permission_classes = [IsAuthenticatedForAPI]  # Enforces authentication for all ApiBb endpoints
+
+class CreateUserAPIView(APIView):
+    # permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        user = request.data.get('user')
+        serializer = UserSerializer(data=user)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

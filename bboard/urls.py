@@ -5,7 +5,7 @@ from django.views.generic.edit import CreateView
 from rest_framework.routers import DefaultRouter
 
 from bboard.models import Bb
-from bboard.views import (APIRubricDetail, APIRubrics, index, by_rubric, BbCreateView,
+from bboard.views import (APIRubricDetail, APIRubrics, CreateUserAPIView, index, by_rubric, BbCreateView,
                           add_and_save, bb_detail, BbRubricBbsView,
                           BbDetailView, BbEditView, BbDeleteView, BbIndexView,
                           BbRedirectView, edit, rubrics, bbs, search, api_rubrics, api_rubric_detail, 
@@ -23,6 +23,8 @@ urlpatterns = [
     # path('api/rubrics/', APIRubrics.as_view()),
     # path('api/rubrics/<int:pk>/', APIRubricDetail.as_view()),
     path('api/', include(router.urls)),
+
+    path('api/user/create/', CreateUserAPIView.as_view()),
 
     path('rubrics/', rubrics, name='rubrics'),
     path('bbs/<int:rubric_id>/', bbs, name='bbs'),
