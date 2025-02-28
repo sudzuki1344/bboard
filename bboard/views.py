@@ -2,6 +2,7 @@ from django.contrib.auth import get_user, authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import transaction, DatabaseError
 from django.db.models import Count
@@ -23,19 +24,17 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.base import View, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView, DeleteView
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
-from bboard.permissions import IsAuthenticatedForAPI, AllowAnyForLogin
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from bboard.forms import BbForm, RubricBaseFormSet, SearchForm
 from bboard.models import Bb, Rubric, Img
-from bboard.serializers import RubricSerializer, BbSerializer, UserSerializer
+from bboard.serializers import RubricSerializer, UserSerializer
 from bboard.signals import add_bb
-from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
 
 
 # Основной (вернуть)
@@ -437,7 +436,7 @@ def my_logout(request):
 ### DRF ###
 ###########
 @api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticatedForAPI])
+# @permission_classes((IsAuthenticated,))
 def api_rubrics(request):
     if request.method == 'GET':
         rubrics = Rubric.objects.all()
@@ -445,10 +444,13 @@ def api_rubrics(request):
         return Response(serializer.data)
     elif request.method == 'POST':
         serializer = RubricSerializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
@@ -472,12 +474,13 @@ def api_rubric_detail(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+#####  APIView  #####
 # class APIRubrics(APIView):
 #     def get(self, request):
 #         rubrics = Rubric.objects.all()
 #         serializer = RubricSerializer(rubrics, many=True)
 #         return Response(serializer.data)
-
+#
 #     def post(self, request):
 #         serializer = RubricSerializer(data=request.data)
 #         if serializer.is_valid():
@@ -488,6 +491,7 @@ def api_rubric_detail(request, pk):
 #                         status=status.HTTP_400_BAD_REQUEST)
 
 
+#####  generics  #####   generics.RetrieveUpdateAPIView, generics.RetrieveDestroyAPIView
 class APIRubrics(generics.ListCreateAPIView):
     queryset = Rubric.objects.all()
     serializer_class = RubricSerializer
@@ -497,91 +501,31 @@ class APIRubricDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rubric.objects.all()
     serializer_class = RubricSerializer
 
+
+### ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 class APIRubricList(generics.ListAPIView):
     queryset = Rubric.objects.all()
     serializer_class = RubricSerializer
 
+
+#####  Метаконтроллеры  #####
 class APIRubricViewSet(ModelViewSet):
+# class APIRubricViewSet(ReadOnlyModelViewSet):
     queryset = Rubric.objects.all()
     serializer_class = RubricSerializer
-    permission_classes = [IsAuthenticatedForAPI]  # Enforces authentication for all APIRubric endpoints
-    
-    def get_queryset(self):
-        queryset = Rubric.objects.all()
-        name = self.request.query_params.get('name', None)
-        if name is not None:
-            queryset = queryset.filter(name__icontains=name)
-        return queryset
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            response_data = {
-                'count': self.paginator.page.paginator.count,
-                'results': serializer.data,
-                'metadata': {
-                    'total_rubrics': Rubric.objects.count(),
-                    'has_bbs': queryset.filter(bb__isnull=False).exists()
-                }
-            }
-            return self.get_paginated_response(response_data)
+    # permission_classes = (IsAuthenticated,)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-    
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        response_data = {
-            'data': serializer.data,
-            'message': 'Rubric created successfully',
-            'status': 'success'
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
-    
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        response_data = {
-            'data': serializer.data,
-            'message': 'Rubric updated successfully',
-            'status': 'success',
-            'related_bbs_count': instance.bb_set.count()
-        }
-        return Response(response_data)
-    
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        bbs_count = instance.bb_set.count()
-        if bbs_count > 0:
-            return Response({
-                'message': f'Cannot delete rubric with {bbs_count} associated bulletin boards',
-                'status': 'error'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        self.perform_destroy(instance)
-        return Response({
-            'message': 'Rubric deleted successfully',
-            'status': 'success'
-        }, status=status.HTTP_204_NO_CONTENT)
 
-class ApiBbViewSet(ModelViewSet):
-    queryset = Bb.objects.all()
-    serializer_class = BbSerializer
-    permission_classes = [IsAuthenticatedForAPI]  # Enforces authentication for all ApiBb endpoints
+#############
+###  JWT  ###
+#############
 
 class CreateUserAPIView(APIView):
     # permission_classes = (AllowAny,)
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
-        user = request.data.get('user')
+        user = request.data
         serializer = UserSerializer(data=user)
         serializer.is_valid(raise_exception=True)
         serializer.save()

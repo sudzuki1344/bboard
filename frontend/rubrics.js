@@ -2,9 +2,9 @@ const domain = 'http://localhost:8000/api/';
 const username = 'admin';
 const password = '123';
 
-const credentials = window.btoa(`${username}:${password}`);
+const credentals = window.btoa(`${username}:${password}`)
 
-
+// const list = document.getElementById('list');
 const list = document.querySelector('#list');
 const itemId = document.querySelector('#id');
 const itemName = document.querySelector('#name');
@@ -31,9 +31,7 @@ async function deleteItem(evt) {
 
 async function loadList() {
     const result = await fetch(`${domain}rubrics/`, {
-        headers: {
-            'Authorization': `Basic ${credentials}`
-        }
+        headers: { 'Authorization': `Basic ${credentals}` }
     });
 
     if(result.ok) {

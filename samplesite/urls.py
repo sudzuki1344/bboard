@@ -20,7 +20,11 @@ from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView, PasswordChangeDoneView, \
     PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+from django.contrib.staticfiles.views import serve
+from django.views.decorators.cache import never_cache
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView, TokenVerifyView)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -56,6 +60,9 @@ urlpatterns += [
 ]
 
 if settings.DEBUG:
+    urlpatterns.append(
+        path('static/<path:path>', never_cache(serve)),
+    )
     urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)
     # urlpatterns += static(settings.THUMBNAIL_MEDIA_URL,

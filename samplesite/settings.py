@@ -9,15 +9,14 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 
 from captcha.conf.settings import CAPTCHA_TIMEOUT, CAPTCHA_LENGTH
 from django.conf.global_settings import STATICFILES_DIRS, ABSOLUTE_URL_OVERRIDES, MEDIA_URL, AUTH_USER_MODEL, \
-    EMAIL_BACKEND, DEFAULT_FROM_EMAIL, EMAIL_HOST, CACHE_MIDDLEWARE_ALIAS, CACHE_MIDDLEWARE_SECONDS
+    EMAIL_BACKEND, DEFAULT_FROM_EMAIL, EMAIL_HOST, CACHE_MIDDLEWARE_ALIAS, CACHE_MIDDLEWARE_SECONDS, LOGGING
 from django.contrib import messages
 from django_bootstrap5.core import BOOTSTRAP5
-from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,9 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=tmq^(flv8$!!=k(oo@xt-65ha*254nv%aoj10z$uk*wyk%*3o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -74,7 +73,6 @@ MIDDLEWARE = [
 
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'bboard.permissions.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
@@ -109,20 +107,20 @@ WSGI_APPLICATION = 'samplesite.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        # 'ATOMIC_REQUEST': True,  # False,
-        # 'AUTOCOMMIT': False,     # True,
-    }
-    # "default": {
-    #     "ENGINE": "django.db.backends.postgresql_psycopg2",
-    #     "NAME": "django_db",
-    #     "USER": "db_user",
-    #     "PASSWORD": "12345",
-    #     "HOST": "127.0.0.1",
-    #     "PORT": "5432",
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    #     # 'ATOMIC_REQUEST': True,  # False,
+    #     # 'AUTOCOMMIT': False,     # True,
     # }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "django_db",
+        "USER": "db_user",
+        "PASSWORD": "12345",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
 }
 
 
@@ -166,7 +164,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
@@ -366,21 +364,21 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_URLS_REGEX = r'^/api/.*$'
 
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.IsAuthenticated', # разрешает доступ к API только авторизованным пользователям
-#         'rest_framework.permissions.AllowAny',  # разрешает доступ к API всем пользователям
-#         'rest_framework.permissions.IsAdminUser', # разрешает доступ к API только администраторам
-#         'rest_framework.permissions.IsAuthenticatedOrReadOnly', # разрешает доступ к API только авторизованным пользователям или только для чтения
-#         'rest_framework.permissions.DjangoModelPermissions', # разрешает доступ к API только авторизованным пользователям с соответствующими правами доступа
-#         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly', # разрешает доступ к API только авторизованным пользователям с соответствующими правами доступа или только для чтения
-#     ),
-# }
-
 REST_FRAMEWORK = {
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.AllowAny',  # по умолчанию, всем всё доступно
+    #     'rest_framework.permissions.IsAuthenticated',  # только аутентифицированным
+    #     'rest_framework.permissions.IsAuthenticatedOrReadOnly',  # не аутентифицированные только читают
+    #     'rest_framework.permissions.IsAdminUser',  # только админам
+    #     'rest_framework.permissions.DjangoModelPermission',  # права из Джанго
+    #     'rest_framework.permissions.DjangoModelPermissionOrAnonReadOnly',  # права из Джанго или чтение
+    # ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    )
 }
 
 
@@ -423,3 +421,67 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+#####################
+###  Логирование  ###
+#####################
+def info_filter(message):
+    return message.levelname == 'INFO'
+
+LOGGING = {
+    'version': 1,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'info_filter': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': info_filter,
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s] %(levelname)s %(message)s',
+            # 'style': '%',  # '{}', '$',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console_dev': {
+            'class': 'logging.StreamHandler',  # в консоль
+            'formatter': 'simple',
+            'filters': ['require_debug_true'],
+        },
+        'console_prod': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+        },
+        'file': {
+            # 'class': 'django.utils.log.AdminEmailHandler',  # на почту админам
+            # 'class': 'logging.handlers.FileHandler',  # в файл
+            'class': 'logging.handlers.RotatingFileHandler',  # в файл
+            'filename': BASE_DIR / 'log/django-site.log',
+            'maxBytes': 1048576,
+            'backupCount': 10,
+            'formatter': 'simple',
+            # 'when': 'D',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console_dev', 'console_prod'],
+        },
+        'django.server': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    }
+}
+
