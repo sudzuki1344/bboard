@@ -116,8 +116,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "django_db",
-        "USER": "db_user",
-        "PASSWORD": "12345",
+        "USER": "django",
+        "PASSWORD": "123",
         "HOST": "127.0.0.1",
         "PORT": "5432",
     }
@@ -165,10 +165,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
-# STATIC_ROOT = BASE_DIR / 'static'
+#STATICFILES_DIRS = [
+#    BASE_DIR / 'static'
+#]
+STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -461,27 +461,27 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
         },
-        'file': {
+#       'file': {
             # 'class': 'django.utils.log.AdminEmailHandler',  # на почту админам
             # 'class': 'logging.handlers.FileHandler',  # в файл
-            'class': 'logging.handlers.RotatingFileHandler',  # в файл
-            'filename': BASE_DIR / 'log/django-site.log',
-            'maxBytes': 1048576,
-            'backupCount': 10,
-            'formatter': 'simple',
+ #           'class': 'logging.handlers.RotatingFileHandler',  # в файл
+#            'filename': BASE_DIR / 'log/django-site.log',
+ #           'maxBytes': 1048576,
+ #           'backupCount': 10,
+ #           'formatter': 'simple',
             # 'when': 'D',
-            'encoding': 'utf-8',
-        },
+ #           'encoding': 'utf-8',
+ #       },
     },
     'loggers': {
         'django': {
             'handlers': ['console_dev', 'console_prod'],
         },
-        'django.server': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
+#        'django.server': {
+ #           'handlers': ['file'],
+  #          'level': 'INFO',
+   #         'propagate': True,
+    #    },
     }
 }
 
