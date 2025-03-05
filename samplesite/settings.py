@@ -336,7 +336,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'cache_table',
         'TIMEOUT': 120,  # по умолчанию 300 сек.
-        'OPITIONS': {
+        'OPTIONS': {
             'MAX_ENTRIES': 200,
         }
     },
