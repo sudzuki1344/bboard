@@ -45,8 +45,8 @@ urlpatterns = [
     path('accounts/reset/done/', PasswordResetCompleteView.as_view(),
          name='password_reset_complete'),
 
-    path('testapp/', include('testapp.urls', namespace='testapp')),
-    path('todo/', include('todolist.urls', namespace='todo')),
+    # path('testapp/', include('testapp.urls', namespace='testapp')),
+    # path('todo/', include('todolist.urls', namespace='todo')),
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
